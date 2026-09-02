@@ -80,12 +80,21 @@ def _cookie_args(cookies: str | None) -> list[str]:
 def _diagnose(stderr: str) -> str:
     err = (stderr or "").lower()
     lines = [ln for ln in (stderr or "").strip().splitlines() if ln.strip()]
-    tail = lines[-1][:160] if lines else "(no stderr)"
     if any(sign in err for sign in _BLOCK_SIGNS):
-        return f"BLOCKED by YouTube (bot check / rate limit) — {tail}"
+        return f"BLOCKED by YouTube (bot check / rate limit) — {lines[-1][:160]}"
     if "no subtitles" in err or "no automatic captions" in err:
-        return f"no captions published — {tail}"
-    return tail
+        return "no captions published for this video"
+    if not lines:
+        # yt-dlp exits quietly when a video simply HAS no captions: it
+        # writes no file and reports no error, so the old "(no stderr)"
+        # was indistinguishable from a real fault. One episode in 407 is
+        # like this (eqq_oEyDusU, "Reid Moncada from Fitted") — public,
+        # 34 minutes, never auto-captioned by YouTube. Naming it is the
+        # difference between a mystery to re-investigate and a known,
+        # permanent gap.
+        return ("no captions available (yt-dlp exited quietly) — verify "
+                "with: yt-dlp --list-subs <url>")
+    return lines[-1][:160]
 
 
 def fetch(video_id: str, cookies: str | None = None,
