@@ -45,10 +45,12 @@ from anthropic import AsyncAnthropic  # noqa: E402
 
 MODEL = os.environ.get("SEARCH_MODEL", "claude-haiku-4-5")
 
-# Long enough to be worth caching (the real system prompt is ~1,400
-# tokens). Anthropic will not cache below a minimum, so a short probe
-# would report "no caching" for the wrong reason.
-CACHE_PROBE = ("You are a test harness. " * 200).strip()
+# The minimum cacheable prefix is model-dependent, between 512 and 4096
+# tokens, and a prefix under the floor silently does not cache. A 1,413
+# token probe reported "no caching at all" against Anthropic direct --
+# a false negative that would have been blamed on the proxy. Sized well
+# clear of the top of that range so a miss here means something real.
+CACHE_PROBE = ("You are a test harness for an API proxy. " * 700).strip()
 
 
 def ok(msg: str) -> None:
@@ -123,8 +125,14 @@ async def main() -> int:
     # --- 2. which model actually answered ----------------------------------
     print("\n2. which model answered")
     served = getattr(r1, "model", "") or ""
+    # An alias resolves to a dated snapshot: asking for claude-haiku-4-5
+    # and being served claude-haiku-4-5-20251001 is the same model, and
+    # is what Anthropic direct does too. Only a different family is a
+    # substitution, so match on the prefix rather than on equality.
     if served == MODEL:
-        ok(f"response.model == {served!r} — same model as asked for")
+        ok(f"response.model == {served!r}")
+    elif served.startswith(MODEL):
+        ok(f"{served!r} — the dated snapshot of {MODEL!r}, same model")
     else:
         bad(f"asked for {MODEL!r}, got {served!r}")
         note("This is the premise of the whole idea. A different model")
@@ -148,9 +156,13 @@ async def main() -> int:
     print("\n4. streaming (beta.messages.stream)")
     try:
         chunks = 0
+        # Ask for enough output that a genuinely streamed response must
+        # arrive in many deltas. "Count to 8" fits in one or two, so a
+        # buffered proxy and a streaming one look identical.
         async with client.beta.messages.stream(
-            model=MODEL, max_tokens=96,
-            messages=[{"role": "user", "content": "Count from 1 to 8."}],
+            model=MODEL, max_tokens=400,
+            messages=[{"role": "user",
+                       "content": "Write 200 words about the sea."}],
         ) as stream:
             async for _ in stream.text_stream:
                 chunks += 1

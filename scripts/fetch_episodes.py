@@ -19,9 +19,11 @@ If YouTube starts refusing (bot check / 429), pass browser cookies:
 """
 
 import json
+import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -60,6 +62,21 @@ _BLOCK_SIGNS = (
 )
 
 
+def _env() -> dict[str, str]:
+    """yt-dlp's environment, with homebrew's bin on PATH.
+
+    --remote-components needs a JS runtime (deno) to solve YouTube's
+    challenge, and a GUI-launched process does not inherit a shell PATH
+    that can find it.
+    """
+    return {**os.environ,
+            "PATH": f"/opt/homebrew/bin:{os.environ.get('PATH', '')}"}
+
+
+def _cookie_args(cookies: str | None) -> list[str]:
+    return ["--cookies-from-browser", cookies] if cookies else []
+
+
 def _diagnose(stderr: str) -> str:
     err = (stderr or "").lower()
     lines = [ln for ln in (stderr or "").strip().splitlines() if ln.strip()]
@@ -74,16 +91,12 @@ def _diagnose(stderr: str) -> str:
 def fetch(video_id: str, cookies: str | None = None,
           attempts: int = 3) -> dict | None:
     url = f"https://www.youtube.com/watch?v={video_id}"
-    cookie_args = ["--cookies-from-browser", cookies] if cookies else []
     # YouTube gates caption downloads behind a JS challenge.
-    # --remote-components pulls yt-dlp's solver; it needs a JS runtime
-    # (deno) on PATH, which is why homebrew's bin is prepended below.
-    common = ["--remote-components", "ejs:github", *cookie_args]
-    env = {**__import__("os").environ,
-           "PATH": f"/opt/homebrew/bin:{__import__('os').environ.get('PATH', '')}"}
+    # --remote-components pulls yt-dlp's solver.
+    common = ["--remote-components", "ejs:github", *_cookie_args(cookies)]
+    env = _env()
     proc = None
     for attempt in range(1, attempts + 1):
-        import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
             # One invocation downloads captions AND prints title + date.
@@ -133,17 +146,13 @@ def channel_ids(limit: int | None = None, cookies: str | None = None) -> list[st
     Deliberately NOT the same request as the per-video fetch: listing the
     channel is one cheap call and is not what the bot check guards.
     """
-    import os
-    cookie_args = ["--cookies-from-browser", cookies] if cookies else []
-    env = {**os.environ,
-           "PATH": f"/opt/homebrew/bin:{os.environ.get('PATH', '')}"}
     cmd = [YTDLP, "--flat-playlist", "--print", "%(id)s",
-           "--remote-components", "ejs:github", *cookie_args]
+           "--remote-components", "ejs:github", *_cookie_args(cookies)]
     if limit:
         cmd += ["--playlist-end", str(limit)]
     cmd.append(get_settings().youtube_channel)
     out = subprocess.run(cmd, capture_output=True, text=True,
-                         check=False, env=env)
+                         check=False, env=_env())
     ids = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
     if not ids:
         err = (out.stderr.strip().splitlines() or ["(no stderr)"])[-1]

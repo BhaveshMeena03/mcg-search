@@ -69,10 +69,26 @@ Deliberately **not** ported yet:
 - **The deep + shallow rerank union.** A measured quality win on the
   other archive. Worth trying if retrieval comes up short.
 
+## Tests
+
+    .venv/bin/pytest -q
+    .venv/bin/ruff check .
+
+36 tests, all offline — nothing in `tests/` calls Voyage, Pinecone or
+Anthropic, so the suite runs the same on a laptop and on CI with no keys.
+They cover the four things that fail silently rather than loudly: caption
+overlap stripping, the embedded-vs-timestamped window invariant, the
+concurrent-write behaviour of `episodes.json`, and the refusal to write
+anywhere near the live Bullpen index.
+
+Anything needing a real key lives in `scripts/` instead — `eval.py` for
+answer quality, `check_usepod.py` for an alternative inference provider.
+Those cost money to run, which is why they are not tests.
+
 ## Not done
 
-No web UI, no API server, no tests yet. This is the pipeline and a CLI to
-judge whether the answers are good enough to build the rest on.
+No web UI and no API server yet. This is the pipeline plus a CLI to judge
+whether the answers are good enough to build the rest on.
 
 ## Safety
 

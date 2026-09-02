@@ -14,7 +14,6 @@ two-host broadcast, because MCG is one host interviewing one project.
 import asyncio
 import hashlib
 import logging
-import re
 from xml.sax.saxutils import escape, quoteattr
 
 import voyageai

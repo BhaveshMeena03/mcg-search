@@ -1,0 +1,22 @@
+[project]
+name = "mcg-search"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Keys are injected here rather than read from .env, so the suite runs the
+# same on a laptop with a filled-in .env and on a CI box with none. A test
+# that only passes because a real key happened to be present is not a test.
+env = [
+    "ANTHROPIC_API_KEY=test-key",
+    "VOYAGE_API_KEY=test-key",
+    "PINECONE_API_KEY=test-key",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]

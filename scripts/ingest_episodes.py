@@ -134,11 +134,33 @@ async def main(argv: list[str]) -> int:
     todo = episodes
     if not force:
         ids = {first_window_id(e): e for e in episodes}
-        present = set()
-        for chunk in [list(ids)[i:i + 100] for i in range(0, len(ids), 100)]:
-            got = idx.index.fetch(ids=chunk, namespace=idx.namespace)
+        present: set[str] = set()
+        all_ids = list(ids)
+        for start in range(0, len(all_ids), 100):
+            chunk = all_ids[start:start + 100]
+
+            def _fetch(batch=chunk):
+                return idx.index.fetch(ids=batch, namespace=idx.namespace)
+
+            # Bounded like every other Pinecone call. The client has no
+            # read timeout of its own, so a half-open socket here would
+            # hang before a single episode had been indexed.
+            try:
+                got = await asyncio.wait_for(
+                    asyncio.to_thread(_fetch),
+                    timeout=settings.pinecone_read_timeout_seconds,
+                )
+            except Exception as exc:                          # noqa: BLE001
+                # Resume is an optimisation, not correctness: the vector
+                # ids are deterministic, so re-indexing an episode
+                # overwrites its own rows. Failing to check costs money,
+                # not data, so say so and do the work rather than stop.
+                log(f"resume check failed ({exc}) — indexing everything")
+                present = set()
+                break
             present |= set(getattr(got, "vectors", {}) or {})
-        todo = [e for vid, e in ids.items() if vid not in present]
+        else:
+            todo = [e for vid, e in ids.items() if vid not in present]
         log(f"{len(episodes) - len(todo)} already indexed, {len(todo)} to do")
 
     total = 0
