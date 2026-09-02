@@ -19,7 +19,17 @@ class Settings(BaseSettings):
     )
 
     # --- Anthropic ---------------------------------------------------------
-    anthropic_api_key: str
+    # Optional, because it is genuinely not needed when routing through a
+    # proxy that authenticates on its own URL token — usepod does, and it
+    # documents this key as ignored. Keeping it required would force a
+    # live Anthropic credential to sit in .env for no reason, which is the
+    # opposite of what you want: the safest place for a secret you do not
+    # need is nowhere.
+    #
+    # Set it only to talk to api.anthropic.com directly. _outbound_key()
+    # in app/search.py decides which of the two is in play, and never
+    # sends a real key anywhere but Anthropic's own host.
+    anthropic_api_key: str = ""
     # Haiku 4.5 is what Market Bubble search answers on. The job is to
     # summarise passages that retrieval already found, not to reason from
     # scratch, and the small model does that at ~$0.004 a question.

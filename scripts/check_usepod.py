@@ -107,6 +107,29 @@ def note(msg: str) -> None:
     print(f"        {_redact(msg)}")
 
 
+def _normalise_model(name: str) -> str:
+    """Reduce a model id to something comparable across providers.
+
+    Anthropic returns "claude-haiku-4-5-20251001"; usepod returns
+    "anthropic/claude-haiku-4.5". Strip any vendor prefix and treat a
+    dotted version as a dashed one, so the comparison is about which
+    model answered rather than whose naming scheme wrote it down.
+    """
+    out = (name or "").lower().split("/")[-1]
+    return out.replace(".", "-")
+
+
+def _same_model(served: str, asked: str) -> bool:
+    """Is `served` the model we asked for, under any naming scheme?
+
+    A prefix match, so a dated snapshot still counts, but only after
+    both sides are normalised. Deliberately NOT a fuzzy match: a
+    different family must still fail, because a proxy silently serving
+    something cheaper is the exact risk this script exists to catch.
+    """
+    return _normalise_model(served).startswith(_normalise_model(asked))
+
+
 def _token_from(base_url: str) -> str:
     """The secret inside a proxy URL, or "" when there isn't one.
 
@@ -155,10 +178,25 @@ def _from_env_file(name: str) -> str:
 
 
 async def main() -> int:
-    base_url = (os.environ.get("ANTHROPIC_BASE_URL", "").strip()
-                or _from_env_file("ANTHROPIC_BASE_URL"))
+    from_shell = os.environ.get("ANTHROPIC_BASE_URL", "").strip()
+    from_file = _from_env_file("ANTHROPIC_BASE_URL")
+    base_url = from_shell or from_file
     api_key = (os.environ.get("ANTHROPIC_API_KEY", "").strip()
                or _from_env_file("ANTHROPIC_API_KEY"))
+
+    # A shell variable wins over .env, which is correct and also the most
+    # dangerous silent failure this script has. This machine exports
+    # ANTHROPIC_BASE_URL=https://api.anthropic.com, so a token sitting
+    # correctly in .env was ignored and the whole suite passed 6/6
+    # against Anthropic direct -- a clean bill of health for a proxy that
+    # was never contacted. Say so loudly rather than pass quietly.
+    if from_shell and from_file and from_shell != from_file:
+        print("!! ANTHROPIC_BASE_URL is set in your SHELL and it overrides")
+        print("!! the value in .env. Testing the shell one:")
+        print(f"!!   shell: {_redact(from_shell)}")
+        print("!! To test the .env value instead, run:")
+        print("!!   env -u ANTHROPIC_BASE_URL .venv/bin/python "
+              "scripts/check_usepod.py\n")
 
     if not base_url:
         print("ANTHROPIC_BASE_URL is not set.\n")
@@ -216,7 +254,11 @@ async def main() -> int:
             messages=[{"role": "user", "content": "Reply with exactly: pong"}],
         )
         elapsed = time.monotonic() - started
-        r1 = raw.parse()
+        # .parse() is a coroutine on the async client — anthropic 1.x
+        # made with_raw_response's parse awaitable. Calling it without
+        # await returns a coroutine object, and the failure surfaces as
+        # a baffling AttributeError about .content.
+        r1 = await raw.parse()
         text = "".join(b.text for b in r1.content if b.type == "text").strip()
         ok(f"relayed in {elapsed:.1f}s — {text[:40]!r}")
 
@@ -243,14 +285,20 @@ async def main() -> int:
     # --- 2. which model actually answered ----------------------------------
     print("\n2. which model answered")
     served = getattr(r1, "model", "") or ""
-    # An alias resolves to a dated snapshot: asking for claude-haiku-4-5
-    # and being served claude-haiku-4-5-20251001 is the same model, and
-    # is what Anthropic direct does too. Only a different family is a
-    # substitution, so match on the prefix rather than on equality.
+    # Two naming conventions, one model. Anthropic direct resolves an
+    # alias to its dated snapshot ("claude-haiku-4-5-20251001"); usepod
+    # returns a marketplace id with a vendor prefix and a dotted version
+    # ("anthropic/claude-haiku-4.5"). Neither is a substitution, so
+    # normalise both before comparing rather than reporting a rename as
+    # a downgrade.
     if served == MODEL:
         ok(f"response.model == {served!r}")
-    elif served.startswith(MODEL):
-        ok(f"{served!r} — the dated snapshot of {MODEL!r}, same model")
+    elif _same_model(served, MODEL):
+        ok(f"{served!r} — same model, {'vendor-prefixed marketplace id'
+            if '/' in served else 'dated snapshot'}")
+        if "/" in served:
+            note("Note: this id carries no dated snapshot, so which")
+            note("snapshot served it cannot be confirmed from the response.")
     else:
         bad(f"asked for {MODEL!r}, got {served!r}")
         note("This is the premise of the whole idea. A different model")
@@ -367,7 +415,7 @@ async def main() -> int:
                     "X-Pod-Max-Price-Output": "2000000",
                 },
             )
-            r7.parse()
+            await r7.parse()
             ok("a route served at or below $0.40/$2.00 per M")
             if r7.headers.get("x-pod-route"):
                 note(f"X-Pod-Route: {r7.headers.get('x-pod-route')}")
