@@ -80,7 +80,8 @@ def _from_env_file(name: str) -> str:
 
 
 async def main() -> int:
-    base_url = os.environ.get("ANTHROPIC_BASE_URL", "").strip()
+    base_url = (os.environ.get("ANTHROPIC_BASE_URL", "").strip()
+                or _from_env_file("ANTHROPIC_BASE_URL"))
     api_key = (os.environ.get("ANTHROPIC_API_KEY", "").strip()
                or _from_env_file("ANTHROPIC_API_KEY"))
 
