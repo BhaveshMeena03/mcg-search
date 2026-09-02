@@ -172,3 +172,26 @@ def test_parses_tags_and_plain_lines(tmp_path):
 ])
 def test_recognises_declines_that_earlier_regexes_missed(answer):
     assert fails("decline", answer) == []
+
+
+# --- a refusal is a stance, not a phrase somewhere in the text ---------
+
+def test_answering_then_caveating_is_not_a_refusal():
+    """The 'wen clawpump' case.
+
+    It answered with a cited date, then closed with "beyond that I
+    couldn't find a general launch date". Matching the phrase anywhere
+    scored that as a refusal and failed it — backwards, since answering
+    first and putting the shortfall last is what rule 1a asks for.
+    """
+    answer = ("At [8:10] the winner gets chosen on the 1st of October. "
+              "Beyond that specific date, I couldn't find other launch "
+              "information in the episodes I've indexed.")
+    assert fails("answer", answer) == []
+
+
+def test_a_refusal_stated_up_front_is_still_a_refusal():
+    answer = ("I couldn't find that in the episodes I've indexed. The "
+              "excerpts cover other projects entirely.")
+    assert fails("refuse", answer) == []
+    assert any("refused a question" in f for f in fails("answer", answer))

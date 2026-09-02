@@ -159,7 +159,17 @@ def check(tag: str, question: str, answer: str, hits: list
         fails.append(f"markdown link: {_MD_LINK.search(answer).group(0)[:60]}")
 
     cites = _TIMESTAMP.findall(answer)
-    refused = any(r in low for r in _REFUSALS)
+
+    # A refusal is the answer's STANCE, not a phrase somewhere in it.
+    #
+    # "wen clawpump" was answered — the Oct 1 winner date, cited — and
+    # then closed with "beyond that I couldn't find a general launch
+    # date". Matching the phrase anywhere scored that as a refusal and
+    # failed it, which is backwards: answering first and putting the
+    # shortfall last is precisely what rule 1a asks for. So the stance
+    # is decided by the opening, where a real refusal always states it.
+    opening = " ".join(re.split(r"(?<=[.!?])\s", answer.strip())[:1]).lower()
+    refused = any(r in opening for r in _REFUSALS)
     declined = bool(_DECLINE.search(answer))
 
     # Rule 1a targets a correct ANSWER wearing a denial. A refusal that
