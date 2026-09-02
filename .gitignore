@@ -16,3 +16,7 @@ data/episodes.json.tmp
 CLAUDE.md
 AGENTS.md
 .DS_Store
+
+# Graded run outputs — regenerate with scripts/grade.py. They contain full
+# answers, so they are large and change every run.
+runs/
