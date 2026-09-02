@@ -1,0 +1,26 @@
+# Questions for judging the MCG index. Grouped by what each group tests,
+# because the groups are a prediction: the format should make group A
+# easier than it is on Market Bubble, and group B is where I expect this
+# index to be worse.
+
+# A. What does this project do. The episode title names the project and
+#    the title is embedded with every window, so this should be strong.
+what does GWOOD do
+what is Umia Finance building
+what problem does Ratspeak solve
+
+# B. The same question, for projects whose names auto-captions will
+#    mangle. This is the predicted weak spot: no term index yet, so a
+#    query spelled correctly has to match a transcript that is not.
+what does Scopl do
+what is Sinjoh building
+tell me about Wall3
+
+# C. Across episodes. Several projects in this batch build on Robinhood
+#    Chain, each in its own episode, so this needs more than one.
+which projects are building on Robinhood Chain
+
+# D. Honest miss. ClawPump has its own MCG episode but it is NOT in this
+#    batch of 15. The right answer is to say so. Answering from general
+#    knowledge instead is the worst failure this tool can have.
+what is ClawPump
