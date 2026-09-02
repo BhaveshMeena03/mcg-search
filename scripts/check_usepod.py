@@ -126,13 +126,30 @@ def _from_env_file(name: str) -> str:
     The app loads .env through pydantic-settings; this script does not use
     Settings because Settings requires every key to be present and this
     needs to run with only an Anthropic one.
+
+    Tolerant of the shape providers hand out, because that is what gets
+    pasted. usepod's dashboard gives you
+
+        export ANTHROPIC_API_KEY="UsePod"
+        export ANTHROPIC_BASE_URL=https://api.usepod.ai/proxy/<token>
+
+    and a parser that only matched a bare KEY=value would silently read
+    nothing from those lines, then report a missing base URL while the
+    value sat right there in the file.
     """
     path = ROOT / ".env"
     if not path.exists():
         return ""
-    for line in path.read_text().splitlines():
-        if line.startswith(f"{name}="):
-            return line.split("=", 1)[1].strip()
+    for raw in path.read_text().splitlines():
+        line = raw.strip()
+        if line.startswith("export "):
+            line = line[len("export "):].lstrip()
+        if not line.startswith(f"{name}="):
+            continue
+        value = line.split("=", 1)[1].strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        return value.strip()
     return ""
 
 
