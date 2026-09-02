@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+.env
+
+# Transcripts are large and re-fetchable from YouTube. The episode list is
+# worth keeping in the repo; the full caption text is not.
+data/episodes.json
+data/episodes.json.lock
+data/episodes.json.tmp
+
+.claude/
+CLAUDE.md
+AGENTS.md
+.DS_Store
