@@ -50,6 +50,7 @@ import os
 import sys
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -187,7 +188,10 @@ async def main() -> int:
     # company's servers for no benefit at all. Against api.anthropic.com
     # this placeholder is expected to fail on auth, which is correct:
     # this script is for testing a proxy, not Anthropic direct.
-    proxied = "api.anthropic.com" not in base_url
+    # Parsed host, not a substring of the URL — the same lookalike-domain
+    # hole that app/search.py had. "api.anthropic.com" appears inside
+    # api.anthropic.com.evil.example, which anyone can register.
+    proxied = (urlparse(base_url).hostname or "").lower() != "api.anthropic.com"
     key = "unused-auth-is-in-the-url" if proxied else api_key
     print("api_key  : " + ("placeholder (auth is the token in the URL)"
                            if proxied else "real key (direct to Anthropic)")

@@ -14,6 +14,7 @@ two-host broadcast, because MCG is one host interviewing one project.
 import asyncio
 import hashlib
 import logging
+from urllib.parse import urlparse
 from xml.sax.saxutils import escape, quoteattr
 
 import voyageai
@@ -189,13 +190,53 @@ def _windows(
     return windows
 
 
+PLACEHOLDER_KEY = "unused-auth-is-in-the-base-url"
+
+# Hosts the real Anthropic credential may be sent to. Anything else is a
+# third party, however trustworthy, and gets the placeholder instead.
+_ANTHROPIC_HOSTS = ("api.anthropic.com",)
+
+
+def _outbound_key(settings) -> str:
+    """The api_key to send, given where the request is going.
+
+    A base-URL swap is the documented way to use an inference proxy, and
+    the obvious implementation forwards whatever key is configured. That
+    sends a live sk-ant-... to another company's servers on every single
+    request. Proxies that authenticate on a path token — usepod does —
+    ignore the key entirely, so there is nothing to lose by withholding
+    it and a real credential to lose by not.
+
+    Compare the parsed HOST, never a substring of the URL. The first
+    version of this asked whether "api.anthropic.com" appeared anywhere
+    in the base URL, which hands the key to
+    https://api.anthropic.com.evil.example/v1 — a domain anyone can
+    register. A test caught it; the substring form is the bug.
+    """
+    base = (settings.anthropic_base_url or "").strip()
+    if not base:
+        return settings.anthropic_api_key
+    host = (urlparse(base).hostname or "").lower()
+    if host in _ANTHROPIC_HOSTS:
+        return settings.anthropic_api_key
+    return PLACEHOLDER_KEY
+
+
 class MCGIndex:
     def __init__(self) -> None:
         settings = get_settings()
         self._settings = settings
         self._voyage = voyageai.AsyncClient(api_key=settings.voyage_api_key)
         self._anthropic = AsyncAnthropic(
-            api_key=settings.anthropic_api_key,
+            # Never hand the real Anthropic key to a third-party endpoint.
+            #
+            # Routing through a proxy is a base-URL swap, and the naive
+            # version of that quietly ships sk-ant-... to whoever owns the
+            # new host. usepod authenticates on a token in its URL path
+            # and documents the api_key as ignored, so forwarding it buys
+            # nothing and risks a live credential. Anything that is not
+            # Anthropic's own host gets a placeholder.
+            api_key=_outbound_key(settings),
             # None means the SDK default. Set ANTHROPIC_BASE_URL to route
             # through a proxy without changing a line of this.
             base_url=settings.anthropic_base_url or None,
