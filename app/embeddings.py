@@ -76,6 +76,24 @@ async def embed_query(
 BATCH_CHAR_BUDGET = 24_000
 MAX_RETRIES = 6
 
+# Transient failures worth retrying, as distinct from a rate limit.
+#
+# Only RateLimitError was retried, so a brief network wobble propagated
+# and killed the request. Measured, not theorised: a 54-question run lost
+# 52 of them to "APIConnectionError: Error communicating with Voyage"
+# during a few seconds of DNS trouble that also broke git push. On a
+# public bot that is every mention failing for the duration.
+#
+# Deliberately NOT retried: AuthenticationError and InvalidRequestError.
+# A bad key or a malformed request fails identically six times and just
+# delays the error by a minute.
+_TRANSIENT = (
+    voyage_error.APIConnectionError,
+    voyage_error.Timeout,
+    voyage_error.ServiceUnavailableError,
+    voyage_error.ServerError,
+)
+
 
 def _batches(texts: list[str], char_budget: int) -> list[list[str]]:
     batches: list[list[str]] = []
@@ -121,6 +139,19 @@ async def embed_texts(
                 logger.info(
                     "Voyage rate limit (batch %d/%d, try %d) — waiting %ds",
                     i + 1, len(batches), attempt, wait,
+                )
+                await asyncio.sleep(wait)
+            except _TRANSIENT as exc:
+                if attempt == MAX_RETRIES:
+                    raise
+                # Shorter backoff than a rate limit: a rate limit needs
+                # the window to pass, a dropped connection usually needs
+                # a second. Starts at 1s so a blip costs a pause rather
+                # than a failed answer.
+                wait = min(2 ** (attempt - 1), 16)
+                logger.warning(
+                    "Voyage %s (batch %d/%d, try %d) — retrying in %ds",
+                    type(exc).__name__, i + 1, len(batches), attempt, wait,
                 )
                 await asyncio.sleep(wait)
         # Pause between batches. Needed only on Voyage's free tier (3
