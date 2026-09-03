@@ -17,6 +17,7 @@ import logging
 from urllib.parse import urlparse
 from xml.sax.saxutils import escape, quoteattr
 
+import anthropic
 import voyageai
 from anthropic import AsyncAnthropic
 from pinecone import Pinecone
@@ -203,6 +204,26 @@ def _windows(
 
 
 PLACEHOLDER_KEY = "unused-auth-is-in-the-base-url"
+
+# Below this, a "question" carries no subject to search for. Three
+# characters keeps real ones: tickers get asked about as "$UP", and "wen"
+# is a whole question on crypto X.
+MIN_QUERY_CHARS = 3
+
+EMPTY_QUERY_ANSWER = (
+    "Ask me something about the MCG episodes — a project name, or what "
+    "someone said about a topic."
+)
+
+# Transport faults only. A refusal or a bad request is a real answer about
+# the request, and retrying it spends money to fail the same way.
+_TRANSIENT = (
+    anthropic.APIConnectionError,
+    anthropic.APITimeoutError,
+    anthropic.InternalServerError,
+    asyncio.TimeoutError,
+)
+ANSWER_RETRIES = 3
 
 # Hosts the real Anthropic credential may be sent to. Anything else is a
 # third party, however trustworthy, and gets the placeholder instead.
@@ -434,14 +455,51 @@ class MCGIndex:
             }],
         }
 
-    async def search(self, query: str, top_k: int | None = None) -> SearchResponse:
-        hits = await self.retrieve(query, top_k)
+    async def _answer(self, query: str, hits: list[Hit]):
+        """One model call, retried on a dropped connection.
+
+        Retrieval already survives a transient network fault; the answer
+        call did not, so a blip after the expensive embedding+rerank work
+        threw the whole question away. One TimeoutError in ~320 graded
+        calls — 0.3%, invisible in a CLI and a visible dead reply on a
+        public bot.
+
+        Only transport faults retry. A refusal, a bad request or an auth
+        error is a real answer about the request and repeating it just
+        spends money to fail again.
+        """
         client = self._anthropic.with_options(
             timeout=self._settings.search_timeout_seconds
         )
-        response = await client.beta.messages.create(
-            **self._build_request(query, hits)
-        )
+        last: Exception | None = None
+        for attempt in range(1, ANSWER_RETRIES + 1):
+            try:
+                return await client.beta.messages.create(
+                    **self._build_request(query, hits)
+                )
+            except _TRANSIENT as exc:
+                last = exc
+                if attempt == ANSWER_RETRIES:
+                    break
+                wait = 2 ** (attempt - 1)
+                logger.warning("answer call failed (%s), retry %d/%d in %ds",
+                               type(exc).__name__, attempt, ANSWER_RETRIES, wait)
+                await asyncio.sleep(wait)
+        raise last                                            # type: ignore[misc]
+
+    async def search(self, query: str, top_k: int | None = None) -> SearchResponse:
+        # A query too short to carry meaning retrieves whatever happens to
+        # be nearest and asks the model to explain it. "?" produced an
+        # answer referring to "the episode title you're asking about" when
+        # no title had been asked about — incoherent rather than harmful,
+        # but on a public bot every reply is published. Cheaper and more
+        # honest to say nothing was asked.
+        if len(query.strip()) < MIN_QUERY_CHARS:
+            return SearchResponse(answer=EMPTY_QUERY_ANSWER, hits=[],
+                                  model=self._settings.search_model)
+
+        hits = await self.retrieve(query, top_k)
+        response = await self._answer(query, hits)
         if response.stop_reason == "refusal":
             return SearchResponse(answer=REFUSAL_ANSWER, hits=[],
                                   model=response.model, refused=True)
