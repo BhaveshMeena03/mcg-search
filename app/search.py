@@ -487,6 +487,32 @@ class MCGIndex:
                 await asyncio.sleep(wait)
         raise last                                            # type: ignore[misc]
 
+    async def answer_stream(self, query: str, hits: list[Hit]):
+        """Yield answer text deltas for already-retrieved hits.
+
+        Streaming is not a nicety here. Measured through the proxy, a
+        single answer takes between 9.5 and 43 seconds on identical
+        input — a 4.5x spread. A page that shows nothing for 43 seconds
+        looks broken; the same wait with words arriving reads as
+        thinking. The caller retrieves first so it can paint the
+        citations before the first token lands.
+
+        No retry wrapper: once bytes have been sent to the browser a
+        retry would duplicate the answer. The caller handles a mid-stream
+        failure by ending the stream honestly.
+        """
+        client = self._anthropic.with_options(
+            timeout=self._settings.search_timeout_seconds
+        )
+        async with client.beta.messages.stream(
+            **self._build_request(query, hits)
+        ) as stream:
+            async for text in stream.text_stream:
+                yield text
+            final = await stream.get_final_message()
+        if final.stop_reason == "refusal":
+            yield "\x00REFUSAL\x00"
+
     async def search(self, query: str, top_k: int | None = None) -> SearchResponse:
         # A query too short to carry meaning retrieves whatever happens to
         # be nearest and asks the model to explain it. "?" produced an

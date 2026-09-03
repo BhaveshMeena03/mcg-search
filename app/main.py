@@ -1,0 +1,179 @@
+"""The MCG search API and the page it serves.
+
+Endpoint names mirror the Market Bubble service so the two read the same
+way to anyone who has seen both:
+
+    GET  /                       the page
+    GET  /v1/episodes            what is indexed, newest first
+    POST /v1/search              answer in one response (bots, scripts)
+    POST /v1/search/stream       the same answer as SSE (the page)
+    GET  /v1/health              liveness, for a platform health check
+
+The page uses the streaming route for one measured reason: an answer
+takes between 9.5 and 43 seconds through the proxy. A page that shows
+nothing for 43 seconds looks broken.
+"""
+
+import asyncio
+import json
+import logging
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, StreamingResponse
+from pydantic import BaseModel, Field
+
+from .config import get_settings
+from .episode_store import load as load_episodes
+from .search import MCGIndex
+
+logger = logging.getLogger(__name__)
+
+ROOT = Path(__file__).resolve().parent.parent
+WEB = ROOT / "web"
+EPISODES = ROOT / "data" / "episodes.json"
+
+app = FastAPI(title="MCG Search", docs_url=None, redoc_url=None)
+
+# One index for the process. Building it opens clients and loads settings;
+# doing that per request would add latency to a path that already has too
+# much of it.
+_index: MCGIndex | None = None
+
+
+def index() -> MCGIndex:
+    global _index
+    if _index is None:
+        _index = MCGIndex()
+    return _index
+
+
+class SearchBody(BaseModel):
+    # Bounded because input is billed per token and the request body is
+    # the one part of the cost a stranger controls.
+    query: str = Field(..., min_length=1, max_length=2000)
+    top_k: int | None = Field(default=None, ge=1, le=20)
+
+
+@app.get("/v1/health")
+async def health() -> dict:
+    return {"ok": True, "model": get_settings().search_model}
+
+
+@app.get("/v1/episodes")
+async def episodes() -> dict:
+    """Titles and dates only.
+
+    Deliberately not the transcripts: the full file is tens of megabytes
+    and the page only needs enough to list what is searchable.
+    """
+    eps = load_episodes(EPISODES)
+    rows = [
+        {
+            "id": e["episode_id"],
+            "title": e["title"],
+            "url": e["url"],
+            "published_at": e.get("published_at"),
+            # Last segment's start is a good enough runtime, and free.
+            "seconds": int(e["segments"][-1]["t"]) if e.get("segments") else 0,
+        }
+        for e in eps
+    ]
+    rows.sort(key=lambda r: r["published_at"] or "", reverse=True)
+    total = sum(r["seconds"] for r in rows)
+    return {"count": len(rows), "hours": round(total / 3600), "episodes": rows}
+
+
+@app.post("/v1/search")
+async def search(body: SearchBody) -> dict:
+    try:
+        result = await index().search(body.query, body.top_k)
+    except Exception as exc:                                  # noqa: BLE001
+        logger.exception("search failed")
+        raise HTTPException(502, "the model call failed") from exc
+    return json.loads(result.model_dump_json())
+
+
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+@app.post("/v1/search/stream")
+async def search_stream(body: SearchBody) -> StreamingResponse:
+    """Citations first, then the answer token by token.
+
+    Retrieval takes about a second and the answer takes tens of seconds,
+    so the hits are sent as soon as they exist. The reader gets something
+    real -- the episodes and moments being read -- while the answer is
+    still being written.
+    """
+    async def stream():
+        query = body.query.strip()
+        idx = index()
+
+        from .search import EMPTY_QUERY_ANSWER, MIN_QUERY_CHARS
+        if len(query) < MIN_QUERY_CHARS:
+            yield _sse("hits", {"hits": []})
+            yield _sse("delta", {"text": EMPTY_QUERY_ANSWER})
+            yield _sse("done", {"refused": False})
+            return
+
+        try:
+            hits = await idx.retrieve(query, body.top_k)
+        except Exception:                                     # noqa: BLE001
+            logger.exception("retrieval failed")
+            yield _sse("error", {"message": "search is unavailable right now"})
+            return
+
+        yield _sse("hits", {"hits": [json.loads(h.model_dump_json())
+                                     for h in hits]})
+
+        refused = False
+        try:
+            async for chunk in idx.answer_stream(query, hits):
+                if chunk == "\x00REFUSAL\x00":
+                    refused = True
+                    continue
+                yield _sse("delta", {"text": chunk})
+        except Exception:                                     # noqa: BLE001
+            # Bytes may already be on the wire, so a retry would duplicate
+            # the answer. End honestly instead of pretending to finish.
+            logger.exception("answer stream failed")
+            yield _sse("error", {"message": "the answer stopped early"})
+            return
+
+        yield _sse("done", {"refused": refused})
+
+    return StreamingResponse(
+        stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            # Nginx and friends buffer SSE by default, which turns a
+            # streamed answer back into a 40-second blank page.
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@app.get("/")
+async def home() -> FileResponse:
+    return FileResponse(WEB / "index.html")
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(WEB / "favicon.svg", media_type="image/svg+xml")
+
+
+async def _warm() -> None:
+    """Build the index client at startup, not on the first question."""
+    try:
+        await asyncio.to_thread(index)
+    except Exception:                                         # noqa: BLE001
+        logger.exception("warm-up failed; will retry on first request")
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    await _warm()

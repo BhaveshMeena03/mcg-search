@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCG Search — ask 406 interviews anything</title>
+<meta name="description" content="Semantic search over every MCG interview. Ask a question, get the answer with the moment they said it.">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* MCG streams live and its thumbnails are red on black. The palette is
+     that, held back: one signal colour, everything else greyscale, so a
+     red timestamp reads as "press this" and nothing competes with it. */
+  --bg:#0c0d0f; --panel:#121417; --panel-2:#171a1e;
+  --line:#23272d; --line-soft:#1b1f24;
+  --ink:#eceef1; --ink-2:#a4abb5; --ink-3:#6e7681;
+  --red:#e8453c; --red-soft:#ff6a60; --red-dim:rgba(232,69,60,.12);
+  --live:#33d17a;
+  --display:"Bricolage Grotesque",Georgia,serif;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --wrap:920px; --r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased;
+  /* A faint vignette so the page has a centre. Flat #000 reads as a
+     terminal; this reads as a studio. */
+  background-image:
+    radial-gradient(1100px 520px at 50% -10%,rgba(232,69,60,.07),transparent 70%),
+    radial-gradient(700px 400px at 90% 8%,rgba(232,69,60,.04),transparent 70%);
+  background-attachment:fixed;
+}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 22px}
+
+/* ---------- disclaimer rail ---------- */
+.rail{
+  border-bottom:1px solid var(--line-soft);background:rgba(12,13,15,.86);
+  backdrop-filter:blur(8px);position:sticky;top:0;z-index:50;
+}
+.rail-in{
+  max-width:var(--wrap);margin:0 auto;padding:9px 22px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.02em;
+  color:var(--ink-3);display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+}
+.rail b{color:var(--ink-2);font-weight:500}
+.dot{width:3px;height:3px;border-radius:50%;background:var(--ink-3);flex:none}
+
+/* ---------- masthead ---------- */
+header{padding:38px 0 6px}
+.brand{
+  display:flex;align-items:center;gap:11px;font-family:var(--mono);
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);
+}
+.brand .mark{
+  font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-.02em;
+  color:var(--ink);text-transform:none;
+}
+.onair{
+  display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;
+  border:1px solid rgba(232,69,60,.35);background:var(--red-dim);color:var(--red-soft);
+  font-size:10px;letter-spacing:.14em;
+}
+.onair i{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+h1{
+  font-family:var(--display);font-weight:700;letter-spacing:-.025em;
+  font-size:clamp(34px,6vw,60px);line-height:1.03;margin:22px 0 14px;
+}
+h1 em{font-style:normal;color:var(--red)}
+.sub{color:var(--ink-2);max-width:56ch;margin:0 0 26px;font-size:16.5px}
+
+/* ---------- search ---------- */
+.searchbar{
+  display:flex;gap:10px;padding:8px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--panel);
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.searchbar:focus-within{
+  border-color:rgba(232,69,60,.5);box-shadow:0 0 0 4px rgba(232,69,60,.09);
+}
+.searchbar input{
+  flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);
+  font:inherit;font-size:16px;padding:11px 12px;
+}
+.searchbar input::placeholder{color:var(--ink-3)}
+.searchbar button{
+  border:0;border-radius:10px;background:var(--red);color:#fff;font:inherit;
+  font-weight:600;font-size:14.5px;padding:11px 20px;cursor:pointer;flex:none;
+  transition:background .16s ease,transform .16s ease;
+}
+.searchbar button:hover:not(:disabled){background:var(--red-soft)}
+.searchbar button:active:not(:disabled){transform:translateY(1px)}
+.searchbar button:disabled{opacity:.45;cursor:default}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.chip{
+  font-family:var(--mono);font-size:12px;color:var(--ink-2);cursor:pointer;
+  padding:7px 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--panel);transition:all .16s ease;
+}
+.chip:hover{border-color:rgba(232,69,60,.45);color:var(--ink);background:var(--panel-2)}
+
+/* ---------- answer ---------- */
+.stage{margin:30px 0 0;display:none}
+.stage.on{display:block;animation:rise .4s cubic-bezier(.2,.7,.3,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.status{
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);
+  display:flex;align-items:center;gap:9px;margin-bottom:14px;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:11px}
+.bars s{width:2px;background:var(--red);animation:eq .9s ease-in-out infinite;display:block;height:4px}
+.bars s:nth-child(2){animation-delay:.15s}.bars s:nth-child(3){animation-delay:.3s}
+.bars s:nth-child(4){animation-delay:.45s}
+@keyframes eq{0%,100%{height:3px;opacity:.5}50%{height:11px;opacity:1}}
+
+.answer{
+  font-size:17px;line-height:1.72;white-space:pre-wrap;
+  border-left:2px solid var(--red);padding:2px 0 2px 20px;margin:0 0 26px;
+}
+.answer .cursor{
+  display:inline-block;width:8px;height:19px;background:var(--red);
+  vertical-align:-3px;margin-left:2px;animation:blink 1s steps(2) infinite;
+}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+
+/* ---------- citations ---------- */
+.cite-head{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 12px;display:flex;align-items:center;gap:10px;
+}
+.cite-head::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.cites{display:grid;gap:10px;margin:0 0 8px}
+.cite{
+  border:1px solid var(--line);border-radius:12px;background:var(--panel);
+  overflow:hidden;transition:border-color .18s ease,background .18s ease;
+  animation:rise .45s cubic-bezier(.2,.7,.3,1) backwards;
+}
+.cite:hover{border-color:rgba(232,69,60,.4);background:var(--panel-2)}
+.cite-top{display:flex;gap:13px;align-items:flex-start;padding:13px 15px;cursor:pointer}
+.ts{
+  font-family:var(--mono);font-size:13px;font-weight:500;color:var(--red);
+  background:var(--red-dim);border:1px solid rgba(232,69,60,.3);
+  padding:4px 9px;border-radius:7px;flex:none;display:inline-flex;
+  align-items:center;gap:6px;transition:all .16s ease;
+}
+.cite:hover .ts{background:rgba(232,69,60,.2);color:var(--red-soft)}
+.ts svg{width:9px;height:9px;fill:currentColor}
+.cite-body{min-width:0;flex:1}
+.cite-title{font-size:14px;font-weight:600;line-height:1.4;margin:1px 0 4px}
+.cite-meta{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.cite-text{
+  font-size:13.5px;color:var(--ink-2);line-height:1.6;margin:8px 0 0;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.player{display:none;border-top:1px solid var(--line);background:#000}
+.player.on{display:block}
+.player .ratio{position:relative;padding-top:56.25%}
+.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+/* ---------- example ---------- */
+.demo{margin:46px 0 0;padding:24px;border:1px solid var(--line);
+  border-radius:var(--r);background:linear-gradient(180deg,var(--panel),rgba(18,20,23,.4))}
+.demo .tag{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-3);margin-bottom:12px;
+}
+.demo .q{font-family:var(--display);font-size:21px;font-weight:600;margin:0 0 12px;letter-spacing:-.01em}
+.demo .a{color:var(--ink-2);font-size:15.5px;line-height:1.7;margin:0 0 16px}
+.demo .a b{color:var(--ink);font-weight:500}
+
+/* ---------- episodes ---------- */
+section{margin:58px 0 0}
+h2{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+.lede{color:var(--ink-3);font-size:14.5px;margin:0 0 18px}
+.ep-search{
+  width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font:inherit;font-size:14px;padding:11px 14px;outline:0;margin:0 0 12px;
+  transition:border-color .18s ease;
+}
+.ep-search:focus{border-color:rgba(232,69,60,.45)}
+.eps{border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:420px;overflow-y:auto}
+.ep{
+  display:flex;gap:12px;align-items:baseline;padding:10px 15px;
+  border-bottom:1px solid var(--line-soft);text-decoration:none;color:inherit;
+  transition:background .14s ease;
+}
+.ep:last-child{border-bottom:0}
+.ep:hover{background:var(--panel-2)}
+.ep .d{font-family:var(--mono);font-size:11px;color:var(--ink-3);flex:none;width:78px}
+.ep .t{font-size:14px;line-height:1.45;min-width:0}
+.ep .m{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-left:auto;flex:none}
+
+footer{
+  margin:64px 0 0;border-top:1px solid var(--line-soft);padding:22px 0 46px;
+  font-family:var(--mono);font-size:11.5px;color:var(--ink-3);line-height:1.9;
+}
+footer a{color:var(--ink-2)}
+.err{color:var(--red-soft);font-size:14px;font-family:var(--mono)}
+@media(max-width:620px){
+  .searchbar{flex-direction:column}
+  .searchbar button{width:100%}
+  .ep .d{width:66px}
+  .ep .m{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-in">
+    <span>Auto-generated captions</span><span class="dot"></span>
+    <span>not financial advice</span><span class="dot"></span>
+    <!-- MCG's own line, from their channel description. It is the single
+         most important thing on the page: the archive is 406 founders
+         pitching their own tokens. -->
+    <span><b>appearance on the show ≠ endorsement</b></span><span class="dot"></span>
+    <span>independent project, not affiliated</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="mark">MCG</span> · search
+      <span class="onair"><i></i>TUE &amp; THU 12:30 EST</span>
+    </div>
+    <h1>Ask <em>406 interviews</em> anything.</h1>
+    <p class="sub">One project per episode, 275 hours of them. Search by meaning
+      rather than keywords — and press a timestamp to hear them say it.</p>
+
+    <form class="searchbar" id="f">
+      <input id="q" autocomplete="off" spellcheck="false"
+             placeholder="what does ClawPump do?" aria-label="Ask a question">
+      <button id="go" type="submit">Search</button>
+    </form>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="status" id="status"></div>
+    <div class="answer" id="answer"></div>
+    <div id="citeWrap" hidden>
+      <p class="cite-head">The moments this came from</p>
+      <div class="cites" id="cites"></div>
+    </div>
+  </div>
+
+  <!-- Shown before anyone types. The Market Bubble page does this and it
+       is the single highest-value element: it demonstrates the product
+       at zero effort instead of asking for faith. -->
+  <div class="demo" id="demo">
+    <p class="tag">For example</p>
+    <p class="q">what fee split does ClawPump use?</p>
+    <p class="a">At <b>26:10</b>, the founder explains they take 1% of platform volume
+      and have “settled down on taking the 35% of that 1% … so 0.35% is the standard.”
+      The remaining share goes to agents and creators — at <b>9:55</b> in the August
+      episode, “65% goes back to the agent and 35% goes back to the ecosystem.”</p>
+    <div class="cites">
+      <div class="cite" style="animation-delay:.05s">
+        <div class="cite-top" data-vid="lTOZ5b3Zt2E" data-t="1570">
+          <span class="ts"><svg viewBox="0 0 10 10"><path d="M0 0l10 5-10 5z"/></svg>26:10</span>
+          <div class="cite-body">
+            <div class="cite-title">CLAWPUMP: the capital market for agents on Solana</div>
+            <div class="cite-meta">press to play the moment</div>
+          </div>
+        </div>
+        <div class="player"><div class="ratio"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>What's indexed</h2>
+    <p class="lede" id="epLede">Loading the archive…</p>
+    <input class="ep-search" id="epq" placeholder="Filter episodes…" aria-label="Filter episodes">
+    <div class="eps" id="eps"></div>
+  </section>
+
+  <footer>
+    Semantic search over MCG interview transcripts · informational only, not
+    financial advice · appearance on the show is not an endorsement of a project ·
+    built as an independent concept, not affiliated with MCG.
+  </footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const el = (t, c) => { const n = document.createElement(t); if (c) n.className = c; return n; };
+
+const EXAMPLES = [
+  "what does ClawPump do",
+  "which projects are building on Robinhood Chain",
+  "what is Umia Finance building",
+  "what do founders say about token utility",
+];
+
+const chips = $("#chips");
+EXAMPLES.forEach(t => {
+  const b = el("button", "chip");
+  b.type = "button"; b.textContent = t;
+  b.onclick = () => { $("#q").value = t; $("#f").requestSubmit(); };
+  chips.appendChild(b);
+});
+
+/* Play the moment in the page rather than sending the reader to YouTube.
+   Linking away ends the session; playing inline keeps the answer on
+   screen next to the evidence for it. */
+function wirePlayer(root) {
+  root.querySelectorAll(".cite-top").forEach(top => {
+    top.onclick = () => {
+      const cite = top.closest(".cite");
+      const player = cite.querySelector(".player");
+      const ratio = player.querySelector(".ratio");
+      if (player.classList.contains("on")) {
+        player.classList.remove("on"); ratio.innerHTML = ""; return;
+      }
+      const f = el("iframe");
+      f.allow = "accelerometer; encrypted-media; picture-in-picture";
+      f.allowFullscreen = true;
+      f.src = `https://www.youtube.com/embed/${top.dataset.vid}` +
+              `?start=${top.dataset.t}&autoplay=1&rel=0&enablejsapi=1`;
+      ratio.appendChild(f);
+      player.classList.add("on");
+      player.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    };
+  });
+}
+wirePlayer($("#demo"));
+
+const vidOf = url => (url.match(/[?&]v=([\w-]{6,})/) || [])[1] || "";
+const fmtDate = d => d ? new Date(d + "T00:00:00Z").toLocaleDateString(undefined,
+  { year: "numeric", month: "short", day: "numeric" }) : "";
+
+function renderHits(hits) {
+  const box = $("#cites"); box.innerHTML = "";
+  if (!hits.length) { $("#citeWrap").hidden = true; return; }
+  $("#citeWrap").hidden = false;
+  hits.forEach((h, i) => {
+    const c = el("div", "cite");
+    c.style.animationDelay = (i * 0.05) + "s";
+    const top = el("div", "cite-top");
+    top.dataset.vid = vidOf(h.deep_link); top.dataset.t = Math.floor(h.start_seconds);
+    top.innerHTML =
+      `<span class="ts"><svg viewBox="0 0 10 10"><path d="M0 0l10 5-10 5z"/></svg>${h.timestamp}</span>
+       <div class="cite-body">
+         <div class="cite-title"></div>
+         <div class="cite-meta">${fmtDate(h.published_at)}${h.published_at ? " · " : ""}press to play</div>
+         <p class="cite-text"></p>
+       </div>`;
+    // textContent, not innerHTML: titles and transcripts are third-party
+    // caption text and must never be parsed as markup.
+    top.querySelector(".cite-title").textContent = h.title;
+    top.querySelector(".cite-text").textContent = h.text;
+    const p = el("div", "player"); p.appendChild(el("div", "ratio"));
+    c.append(top, p); box.appendChild(c);
+  });
+  wirePlayer(box);
+}
+
+let busy = false;
+$("#f").onsubmit = async e => {
+  e.preventDefault();
+  const query = $("#q").value.trim();
+  if (!query || busy) return;
+  busy = true; $("#go").disabled = true;
+
+  $("#demo").style.display = "none";
+  $("#stage").classList.add("on");
+  const ans = $("#answer"); ans.textContent = "";
+  $("#cites").innerHTML = ""; $("#citeWrap").hidden = true;
+  $("#status").innerHTML =
+    `<span class="bars"><s></s><s></s><s></s><s></s></span> searching 406 episodes`;
+
+  const cursor = el("span", "cursor");
+  try {
+    const res = await fetch("/v1/search/stream", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query })
+    });
+    if (!res.ok || !res.body) throw new Error("http " + res.status);
+
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "", started = false;
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const parts = buf.split("\n\n"); buf = parts.pop();
+      for (const part of parts) {
+        const ev = (part.match(/^event: (.+)$/m) || [])[1];
+        const raw = (part.match(/^data: (.+)$/m) || [])[1];
+        if (!ev || !raw) continue;
+        const d = JSON.parse(raw);
+        if (ev === "hits") {
+          renderHits(d.hits);
+          $("#status").innerHTML =
+            `<span class="bars"><s></s><s></s><s></s><s></s></span> reading ${d.hits.length} passages`;
+        } else if (ev === "delta") {
+          if (!started) { started = true; ans.textContent = ""; ans.appendChild(cursor); }
+          cursor.before(document.createTextNode(d.text));
+        } else if (ev === "error") {
+          ans.innerHTML = `<span class="err">${d.message}</span>`;
+        } else if (ev === "done") {
+          cursor.remove();
+          $("#status").textContent = d.refused ? "declined" : "answered from the archive";
+        }
+      }
+    }
+    cursor.remove();
+  } catch (err) {
+    cursor.remove();
+    ans.innerHTML = `<span class="err">Something broke on the way back. Try again.</span>`;
+    $("#status").textContent = "failed";
+  } finally {
+    busy = false; $("#go").disabled = false;
+  }
+};
+
+/* The episode list doubles as proof of scale: 406 rows is the argument
+   that this generalises past one show. */
+fetch("/v1/episodes").then(r => r.json()).then(d => {
+  $("#epLede").textContent =
+    `${d.count} interviews · ${d.hours} hours · one project per episode.`;
+  const box = $("#eps");
+  const draw = rows => {
+    box.innerHTML = "";
+    rows.slice(0, 500).forEach(e => {
+      const a = el("a", "ep");
+      a.href = e.url; a.target = "_blank"; a.rel = "noopener";
+      const d1 = el("div", "d"); d1.textContent = fmtDate(e.published_at);
+      const t = el("div", "t"); t.textContent = e.title;
+      const m = el("div", "m"); m.textContent = Math.round(e.seconds / 60) + "m";
+      a.append(d1, t, m); box.appendChild(a);
+    });
+    if (!rows.length) box.innerHTML =
+      `<div class="ep"><div class="t" style="color:var(--ink-3)">No episode matches that.</div></div>`;
+  };
+  draw(d.episodes);
+  $("#epq").oninput = ev => {
+    const q = ev.target.value.toLowerCase().trim();
+    draw(q ? d.episodes.filter(e => e.title.toLowerCase().includes(q)) : d.episodes);
+  };
+}).catch(() => { $("#epLede").textContent = "Could not load the episode list."; });
+</script>
+</body>
+</html>
