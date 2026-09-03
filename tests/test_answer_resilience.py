@@ -223,3 +223,33 @@ def test_a_proxy_token_is_redacted_from_logs():
     msg = "Connection to https://api.usepod.ai/proxy/tok_secret123/v1 failed"
     assert "tok_secret123" not in _redact_proxy(msg)
     assert "<token>" in _redact_proxy(msg)
+
+
+# --- pinning the upstream provider -------------------------------------
+
+def test_the_pin_header_is_sent_when_configured(monkeypatch):
+    idx = _index()
+    monkeypatch.setattr(idx._settings, "usepod_providers", "anthropic")
+    monkeypatch.setattr(idx._settings, "anthropic_base_url",
+                        "https://api.usepod.ai/proxy/tok")
+    assert idx._proxy_headers() == {"X-Pod-Providers": "anthropic"}
+    assert "extra_headers" in idx._build_request("q", [])
+
+
+def test_no_pin_header_without_configuration(monkeypatch):
+    idx = _index()
+    monkeypatch.setattr(idx._settings, "usepod_providers", "")
+    assert idx._proxy_headers() == {}
+    assert "extra_headers" not in idx._build_request("q", [])
+
+
+def test_the_pin_is_never_sent_to_anthropic_itself(monkeypatch):
+    """X-Pod-* means nothing at api.anthropic.com, and sending it would
+    tell Anthropic which proxy this app routes through. The fallback
+    exists to escape the proxy; it must not carry the proxy's headers."""
+    idx = _index()
+    monkeypatch.setattr(idx._settings, "usepod_providers", "anthropic")
+    monkeypatch.setattr(idx._settings, "anthropic_base_url",
+                        "https://api.usepod.ai/proxy/tok")
+    assert idx._proxy_headers(going_direct=True) == {}
+    assert "extra_headers" not in idx._build_request("q", [], going_direct=True)

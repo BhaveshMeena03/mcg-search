@@ -537,8 +537,22 @@ class MCGIndex:
         ]
         return "<excerpts>\n" + "\n\n".join(blocks) + "\n</excerpts>"
 
-    def _build_request(self, query: str, hits: list[Hit]) -> dict:
+    def _proxy_headers(self, going_direct: bool = False) -> dict:
+        """X-Pod-Providers, when a pin is configured and we're proxied.
+
+        Never sent to api.anthropic.com: an X-Pod-* header means nothing
+        there, and sending it would leak which proxy this app uses.
+        """
+        pin = (self._settings.usepod_providers or "").strip()
+        if going_direct or not pin or not self._settings.anthropic_base_url:
+            return {}
+        return {"X-Pod-Providers": pin}
+
+    def _build_request(self, query: str, hits: list[Hit],
+                       going_direct: bool = False) -> dict:
+        headers = self._proxy_headers(going_direct)
         return {
+            **({"extra_headers": headers} if headers else {}),
             "model": self._settings.search_model,
             "max_tokens": self._settings.search_max_tokens,
             "system": [
@@ -569,6 +583,9 @@ class MCGIndex:
         spends money to fail again.
         """
         chosen, can_fall_back = self._llm()
+        # True when the client in hand is Anthropic itself, either
+        # because no proxy is configured or because we already fell over.
+        going_direct = chosen is self._fallback
         client = chosen.with_options(
             timeout=self._settings.search_timeout_seconds
         )
@@ -576,7 +593,7 @@ class MCGIndex:
         for attempt in range(1, ANSWER_RETRIES + 1):
             try:
                 return await client.beta.messages.create(
-                    **self._build_request(query, hits)
+                    **self._build_request(query, hits, going_direct)
                 )
             except _TRANSIENT as exc:
                 last = exc
@@ -588,6 +605,7 @@ class MCGIndex:
                     client = self._fallback.with_options(
                         timeout=self._settings.search_timeout_seconds
                     )
+                    going_direct = True
                     can_fall_back = False
                     continue
                 if attempt == ANSWER_RETRIES:
@@ -614,7 +632,9 @@ class MCGIndex:
         """
         chosen, can_fall_back = self._llm()
         try:
-            async for chunk in self._stream_once(chosen, query, hits):
+            async for chunk in self._stream_once(
+                chosen, query, hits, going_direct=chosen is self._fallback
+            ):
                 yield chunk
             return
         except _TRANSIENT as exc:
@@ -625,17 +645,19 @@ class MCGIndex:
             if not can_fall_back:
                 raise
             self._proxy_broke(exc)
-        async for chunk in self._stream_once(self._fallback, query, hits):
+        async for chunk in self._stream_once(self._fallback, query, hits,
+                                            going_direct=True):
             yield chunk
 
-    async def _stream_once(self, client, query: str, hits: list[Hit]):
+    async def _stream_once(self, client, query: str, hits: list[Hit],
+                           going_direct: bool = False):
         started = False
         try:
             bound = client.with_options(
                 timeout=self._settings.search_timeout_seconds
             )
             async with bound.beta.messages.stream(
-                **self._build_request(query, hits)
+                **self._build_request(query, hits, going_direct)
             ) as stream:
                 async for text in stream.text_stream:
                     started = True

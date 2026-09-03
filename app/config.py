@@ -39,6 +39,23 @@ class Settings(BaseSettings):
     # Set ANTHROPIC_BASE_URL to route through a proxy without touching code.
     anthropic_base_url: str | None = None
 
+    # Which upstream providers the proxy may use, in preference order.
+    # Empty means "let it route", which optimises for price and is why the
+    # source can change between two identical requests: this archive went
+    # from a relay doing 70 output tok/s to one doing 5.9 overnight, with
+    # no change here.
+    #
+    # "anthropic" pins to first-party Claude. Note what that costs: a pin
+    # skips the marketplace entirely, so the price is the centralized tier
+    # ($0.80/$4.00 per M) rather than the marketplace one ($0.40/$2.00).
+    # Still under Anthropic direct at $1.00/$5.00, and predictable, which
+    # is the thing worth buying for a page someone is waiting on.
+    #
+    # A pin is a HARD constraint: unsatisfiable pins 503 rather than
+    # quietly falling back, so this and the Anthropic fallback in
+    # app/search.py do different jobs and both earn their place.
+    usepod_providers: str = ""
+
     # --- Voyage (embeddings + reranker) ------------------------------------
     voyage_api_key: str
     voyage_model: str = "voyage-3.5"
