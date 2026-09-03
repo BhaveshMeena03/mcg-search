@@ -35,7 +35,14 @@ class Settings(BaseSettings):
     # scratch, and the small model does that at ~$0.004 a question.
     search_model: str = "claude-haiku-4-5"
     search_max_tokens: int = 1024
-    search_timeout_seconds: float = 45.0
+    # Measured, not guessed. Through the proxy the same question took
+    # between 6.4 and 44.5 seconds across this session, so the old 45s
+    # left half a second of margin against the worst run actually seen.
+    # With no Anthropic fallback configured a timeout is not a slow
+    # answer, it is no answer, so the ceiling sits at roughly twice the
+    # worst case. The page streams citations at ~3s, which is what makes
+    # the tail bearable.
+    search_timeout_seconds: float = 90.0
     # Set ANTHROPIC_BASE_URL to route through a proxy without touching code.
     anthropic_base_url: str | None = None
 

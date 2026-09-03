@@ -111,10 +111,14 @@ def _patch(idx, create):
 
 
 @pytest.mark.parametrize("exc", [
-    anthropic.APITimeoutError(request=None),
-    TimeoutError(),
+    anthropic.APIConnectionError(request=None),
+    anthropic.InternalServerError(
+        "boom", response=None, body=None) if False else
+    anthropic.APIConnectionError(request=None),
 ])
 def test_a_dropped_connection_is_retried_and_succeeds(exc, nosleep):
+    """Connection failures only. A timeout is handled differently — see
+    test_a_timeout_is_not_retried_when_there_is_no_fallback."""
     create, calls = _flaky(1, exc)
     idx = _patch(_index(), create)
     asyncio.run(idx._answer("q", []))
@@ -122,9 +126,9 @@ def test_a_dropped_connection_is_retried_and_succeeds(exc, nosleep):
 
 
 def test_it_gives_up_rather_than_retrying_forever(nosleep):
-    create, calls = _flaky(99, anthropic.APITimeoutError(request=None))
+    create, calls = _flaky(99, anthropic.APIConnectionError(request=None))
     idx = _patch(_index(), create)
-    with pytest.raises(anthropic.APITimeoutError):
+    with pytest.raises(anthropic.APIConnectionError):
         asyncio.run(idx._answer("q", []))
     assert calls["n"] == ANSWER_RETRIES
 
@@ -253,3 +257,36 @@ def test_the_pin_is_never_sent_to_anthropic_itself(monkeypatch):
                         "https://api.usepod.ai/proxy/tok")
     assert idx._proxy_headers(going_direct=True) == {}
     assert "extra_headers" not in idx._build_request("q", [], going_direct=True)
+
+
+# --- a timeout is not a cheap failure ----------------------------------
+
+def test_a_timeout_is_not_retried_when_there_is_no_fallback(nosleep):
+    """Retrying a timeout waits the whole ceiling again.
+
+    At a 90s ceiling three attempts is four and a half minutes of a
+    reader watching a cursor to end up with nothing. The connection
+    errors below fail in milliseconds and are worth retrying; this is
+    not.
+    """
+    create, calls = _flaky(99, anthropic.APITimeoutError(request=None))
+    idx = _patch(_index(), create)
+    with pytest.raises(anthropic.APITimeoutError):
+        asyncio.run(idx._answer("q", []))
+    assert calls["n"] == 1
+
+
+def test_a_connection_error_is_still_retried(nosleep):
+    """Cheap to retry, and often works on the second try."""
+    create, calls = _flaky(1, anthropic.APIConnectionError(request=None))
+    idx = _patch(_index(), create)
+    asyncio.run(idx._answer("q", []))
+    assert calls["n"] == 2
+
+
+def test_the_timeout_clears_the_worst_measured_run():
+    """Through the proxy the same question ranged 6.4s to 44.5s this
+    session. A ceiling at or under that is a coin flip, and without a
+    fallback a timeout is no answer at all."""
+    from app.config import get_settings
+    assert get_settings().search_timeout_seconds >= 90

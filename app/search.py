@@ -241,14 +241,26 @@ EMPTY_QUERY_ANSWER = (
     "someone said about a topic."
 )
 
-# Transport faults only. A refusal or a bad request is a real answer about
-# the request, and retrying it spends money to fail the same way.
-_TRANSIENT = (
+# Faults where trying again is cheap and likely to work: the connection
+# never established, or the far end returned a 5xx. These fail in
+# milliseconds, so a retry costs almost nothing.
+_RETRYABLE = (
     anthropic.APIConnectionError,
-    anthropic.APITimeoutError,
     anthropic.InternalServerError,
+)
+
+# A timeout is different and must not be lumped in with those. It means
+# the proxy accepted the request and is being slow, so retrying waits the
+# whole ceiling again — at 90s that is three minutes of a reader watching
+# a cursor before they get nothing. Retry the cheap failures; fail fast
+# on the expensive one.
+_SLOW = (
+    anthropic.APITimeoutError,
     asyncio.TimeoutError,
 )
+
+# Anything that should hand over to the fallback, when one is configured.
+_TRANSIENT = _RETRYABLE + _SLOW
 ANSWER_RETRIES = 3
 
 # A proxy that just failed should cost one slow answer, not one per
@@ -608,7 +620,9 @@ class MCGIndex:
                     going_direct = True
                     can_fall_back = False
                     continue
-                if attempt == ANSWER_RETRIES:
+                # A timeout already cost the full ceiling. Waiting it
+                # again is worse for the reader than admitting defeat.
+                if isinstance(exc, _SLOW) or attempt == ANSWER_RETRIES:
                     break
                 wait = 2 ** (attempt - 1)
                 logger.warning("answer call failed (%s), retry %d/%d in %ds",
