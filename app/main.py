@@ -9,9 +9,11 @@ way to anyone who has seen both:
     POST /v1/search/stream       the same answer as SSE (the page)
     GET  /v1/health              liveness, for a platform health check
 
-The page uses the streaming route for one measured reason: an answer
-takes between 9.5 and 43 seconds through the proxy. A page that shows
-nothing for 43 seconds looks broken.
+The page uses the streaming route so citations can be painted as soon as
+retrieval finishes, about a second in, rather than after the answer. The
+answer itself arrives in one piece by default: through the proxy a
+streamed call takes ~19s to reach its first token where the whole
+non-streamed call returns in ~4.4s. See stream_answers in app/config.py.
 """
 
 import asyncio
@@ -25,7 +27,7 @@ from pydantic import BaseModel, Field
 
 from .config import get_settings
 from .episode_store import load as load_episodes
-from .search import MCGIndex
+from .search import REFUSAL_ANSWER, MCGIndex, check_credentials
 
 logger = logging.getLogger(__name__)
 
@@ -130,11 +132,26 @@ async def search_stream(body: SearchBody) -> StreamingResponse:
 
         refused = False
         try:
-            async for chunk in idx.answer_stream(query, hits):
-                if chunk == "\x00REFUSAL\x00":
+            if get_settings().stream_answers:
+                async for chunk in idx.answer_stream(query, hits):
+                    if chunk == "\x00REFUSAL\x00":
+                        refused = True
+                        continue
+                    yield _sse("delta", {"text": chunk})
+            else:
+                # One call, one delta. The SSE contract is unchanged, so
+                # the page does not care which of these produced the text
+                # — but through the proxy this reaches a COMPLETE answer
+                # in about the time the streamed one takes to emit its
+                # first token. See stream_answers in app/config.py.
+                response = await idx._answer(query, hits)
+                if response.stop_reason == "refusal":
                     refused = True
-                    continue
-                yield _sse("delta", {"text": chunk})
+                    yield _sse("delta", {"text": REFUSAL_ANSWER})
+                else:
+                    text = "".join(b.text for b in response.content
+                                   if b.type == "text")
+                    yield _sse("delta", {"text": text})
         except Exception:                                     # noqa: BLE001
             # Bytes may already be on the wire, so a retry would duplicate
             # the answer. End honestly instead of pretending to finish.
@@ -167,7 +184,13 @@ async def favicon():
 
 
 async def _warm() -> None:
-    """Build the index client at startup, not on the first question."""
+    """Check the config can work, then build the client.
+
+    The credential check is deliberately NOT caught: a server that
+    cannot reach a model should refuse to start rather than accept
+    traffic and fail every request with an SDK error nobody can read.
+    """
+    check_credentials(get_settings())
     try:
         await asyncio.to_thread(index)
     except Exception:                                         # noqa: BLE001

@@ -63,6 +63,21 @@ class Settings(BaseSettings):
     # app/search.py do different jobs and both earn their place.
     usepod_providers: str = ""
 
+    # Whether the page's answer arrives token by token.
+    #
+    # Off, because measured through the proxy streaming is strictly worse
+    # than not streaming. Pinned to Anthropic the whole non-streamed call
+    # returns in 4.4s, while the streamed one takes 18.9s just to reach
+    # the FIRST token and arrives in 8-10 lumps rather than the ~90 a
+    # real stream produces. The proxy is buffering.
+    #
+    # So the page sends citations as soon as retrieval finishes -- about
+    # a second -- and then the finished answer in one piece a few seconds
+    # later. That is faster to a complete answer than watching it trickle.
+    # Turn this back on if talking to Anthropic directly, where streaming
+    # is genuinely incremental.
+    stream_answers: bool = False
+
     # --- Voyage (embeddings + reranker) ------------------------------------
     voyage_api_key: str
     voyage_model: str = "voyage-3.5"

@@ -56,3 +56,50 @@ def test_a_lookalike_host_does_not_get_the_key():
     """
     s = Settings("https://api.anthropic.com.evil.example/v1")
     assert _outbound_key(s) == PLACEHOLDER_KEY
+
+
+# --- refusing to start on a config that cannot answer -------------------
+
+def test_direct_without_a_key_is_refused_at_startup():
+    """The real failure: the shell exported ANTHROPIC_BASE_URL pointing
+    at Anthropic while the key had been removed. Every request raised an
+    SDK TypeError about authentication methods and the page just said
+    the answer stopped early."""
+    import pytest
+
+    from app.search import Misconfigured, check_credentials
+
+    class S:
+        anthropic_api_key = ""
+        anthropic_base_url = "https://api.anthropic.com"
+
+    with pytest.raises(Misconfigured) as exc:
+        check_credentials(S())
+    assert "ANTHROPIC_API_KEY" in str(exc.value)
+    # The cause is almost always a shell variable beating .env, so say so.
+    assert "shell" in str(exc.value).lower()
+
+
+def test_no_base_url_and_no_key_is_also_refused():
+    import pytest
+
+    from app.search import Misconfigured, check_credentials
+
+    class S:
+        anthropic_api_key = ""
+        anthropic_base_url = None
+
+    with pytest.raises(Misconfigured):
+        check_credentials(S())
+
+
+def test_a_proxy_without_an_anthropic_key_is_fine():
+    """The intended production shape: the proxy authenticates on its own
+    URL token, so no Anthropic credential is needed or wanted."""
+    from app.search import check_credentials
+
+    class S:
+        anthropic_api_key = ""
+        anthropic_base_url = "https://api.usepod.ai/proxy/tok"
+
+    check_credentials(S())        # must not raise

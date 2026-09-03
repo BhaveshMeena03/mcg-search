@@ -300,6 +300,36 @@ def _redact_proxy(text: str) -> str:
     return re.sub(r"(/proxy/)[^/\s]+", r"\1<token>", text or "")
 
 
+class Misconfigured(RuntimeError):
+    """A settings combination that cannot answer anything.
+
+    Raised at startup rather than per request. The failure it replaces
+    was a TypeError about authentication methods on every single
+    question, which says nothing about the cause.
+    """
+
+
+def check_credentials(settings) -> None:
+    """Fail at boot when nothing can authenticate.
+
+    Going direct to Anthropic needs a key. This happened for real: the
+    shell exported ANTHROPIC_BASE_URL=https://api.anthropic.com while
+    the key had been removed, so every request raised an SDK TypeError
+    and the page just said the answer stopped early.
+    """
+    base = (settings.anthropic_base_url or "").strip()
+    host = (urlparse(base).hostname or "").lower() if base else ""
+    going_direct = not base or host in _ANTHROPIC_HOSTS
+    if going_direct and not settings.anthropic_api_key:
+        raise Misconfigured(
+            "No way to reach a model. ANTHROPIC_BASE_URL is "
+            f"{base or 'unset'}, which means Anthropic directly, but "
+            "ANTHROPIC_API_KEY is empty. Either set the key, or point "
+            "ANTHROPIC_BASE_URL at the proxy. Note a shell variable "
+            "overrides .env, which is how this usually happens."
+        )
+
+
 def _outbound_key(settings) -> str:
     """The api_key to send, given where the request is going.
 
