@@ -14,6 +14,8 @@ two-host broadcast, because MCG is one host interviewing one project.
 import asyncio
 import hashlib
 import logging
+import re
+import time
 from urllib.parse import urlparse
 from xml.sax.saxutils import escape, quoteattr
 
@@ -249,9 +251,41 @@ _TRANSIENT = (
 )
 ANSWER_RETRIES = 3
 
+# A proxy that just failed should cost one slow answer, not one per
+# visitor for as long as it stays down. Long enough that an outage is not
+# re-tested by everybody who shows up, short enough that recovery needs
+# no deploy.
+class StreamAlreadyStarted(Exception):
+    """The proxy died mid-answer, after text had already been sent.
+
+    Distinct from a clean failure because the recovery differs: before
+    the first token a fallback is invisible to the reader, after it a
+    second attempt would print the answer twice.
+    """
+
+
+PROXY_COOLDOWN_SECONDS = 300
+
+# Named, and that is not decoration. The SDK reads ANTHROPIC_BASE_URL
+# from the environment when it is not told otherwise, which is exactly
+# how the proxy gets configured — so a fallback client built with only a
+# key inherits the proxy and quietly becomes a second route to the thing
+# that just failed.
+ANTHROPIC_DIRECT_URL = "https://api.anthropic.com"
+
 # Hosts the real Anthropic credential may be sent to. Anything else is a
 # third party, however trustworthy, and gets the placeholder instead.
 _ANTHROPIC_HOSTS = ("api.anthropic.com",)
+
+
+def _redact_proxy(text: str) -> str:
+    """Hide a proxy token in anything about to be logged.
+
+    usepod authenticates on a token in the URL PATH, so it rides inside
+    every URL the SDK builds and turns up in exception text. An error
+    logged raw would write a live credential into the server log.
+    """
+    return re.sub(r"(/proxy/)[^/\s]+", r"\1<token>", text or "")
 
 
 def _outbound_key(settings) -> str:
@@ -298,7 +332,49 @@ class MCGIndex:
             # through a proxy without changing a line of this.
             base_url=settings.anthropic_base_url or None,
         )
+        # Anthropic direct, held ready, and only when the client above is
+        # NOT already that. A proxy can run out of balance, have its token
+        # revoked, or get routed to a provider that stops answering — and
+        # every one of those looks like the site being down to somebody
+        # typing a question. Measured here: the route silently moved from
+        # a relay doing 70 tok/s to one doing 5.9, and a trivial request
+        # stopped returning inside two minutes. Nothing in this repo
+        # caused it and nothing in this repo could have prevented it.
+        #
+        # This client carries the real key, which is exactly why the one
+        # above does not.
+        self._fallback = None
+        if settings.anthropic_base_url and settings.anthropic_api_key:
+            self._fallback = AsyncAnthropic(
+                api_key=settings.anthropic_api_key,
+                base_url=ANTHROPIC_DIRECT_URL,
+            )
+        # When the proxy last failed. Inside the cooldown every request
+        # goes straight to Anthropic rather than paying the timeout again.
+        self._proxy_failed_at = 0.0
         self._index = None
+
+    def _llm(self):
+        """The client to try, and whether a fallback is still held back.
+
+        Inside the cooldown this hands back Anthropic directly, so an
+        outage costs one slow answer rather than one per visitor for as
+        long as it lasts.
+        """
+        if self._fallback is None:
+            return self._anthropic, False
+        cooling = (time.monotonic() - self._proxy_failed_at
+                   < PROXY_COOLDOWN_SECONDS)
+        if cooling:
+            return self._fallback, False
+        return self._anthropic, True
+
+    def _proxy_broke(self, exc: Exception) -> None:
+        self._proxy_failed_at = time.monotonic()
+        logger.error(
+            "the model proxy failed (%s) — answering on Anthropic direct, "
+            "and skipping the proxy for %ds",
+            _redact_proxy(str(exc))[:200], PROXY_COOLDOWN_SECONDS)
 
     @property
     def namespace(self) -> str:
@@ -492,7 +568,8 @@ class MCGIndex:
         error is a real answer about the request and repeating it just
         spends money to fail again.
         """
-        client = self._anthropic.with_options(
+        chosen, can_fall_back = self._llm()
+        client = chosen.with_options(
             timeout=self._settings.search_timeout_seconds
         )
         last: Exception | None = None
@@ -503,6 +580,16 @@ class MCGIndex:
                 )
             except _TRANSIENT as exc:
                 last = exc
+                # One failure on the proxy is enough to stop using it.
+                # Retrying a route that has already timed out just pays
+                # the timeout again, and the way back is right there.
+                if can_fall_back:
+                    self._proxy_broke(exc)
+                    client = self._fallback.with_options(
+                        timeout=self._settings.search_timeout_seconds
+                    )
+                    can_fall_back = False
+                    continue
                 if attempt == ANSWER_RETRIES:
                     break
                 wait = 2 ** (attempt - 1)
@@ -525,17 +612,43 @@ class MCGIndex:
         retry would duplicate the answer. The caller handles a mid-stream
         failure by ending the stream honestly.
         """
-        client = self._anthropic.with_options(
-            timeout=self._settings.search_timeout_seconds
-        )
-        async with client.beta.messages.stream(
-            **self._build_request(query, hits)
-        ) as stream:
-            async for text in stream.text_stream:
-                yield text
-            final = await stream.get_final_message()
-        if final.stop_reason == "refusal":
-            yield "\x00REFUSAL\x00"
+        chosen, can_fall_back = self._llm()
+        try:
+            async for chunk in self._stream_once(chosen, query, hits):
+                yield chunk
+            return
+        except _TRANSIENT as exc:
+            # Only safe to fail over before any text has been sent. Once
+            # bytes are on the wire a second attempt would repeat the
+            # answer from the top, so _stream_once raises Started for
+            # anything that breaks mid-answer and it lands below.
+            if not can_fall_back:
+                raise
+            self._proxy_broke(exc)
+        async for chunk in self._stream_once(self._fallback, query, hits):
+            yield chunk
+
+    async def _stream_once(self, client, query: str, hits: list[Hit]):
+        started = False
+        try:
+            bound = client.with_options(
+                timeout=self._settings.search_timeout_seconds
+            )
+            async with bound.beta.messages.stream(
+                **self._build_request(query, hits)
+            ) as stream:
+                async for text in stream.text_stream:
+                    started = True
+                    yield text
+                final = await stream.get_final_message()
+            if final.stop_reason == "refusal":
+                yield "\x00REFUSAL\x00"
+        except _TRANSIENT:
+            if started:
+                # Half an answer is already rendered. Ending here is
+                # honest; restarting would print it twice.
+                raise StreamAlreadyStarted from None
+            raise
 
     async def search(self, query: str, top_k: int | None = None) -> SearchResponse:
         # A query too short to carry meaning retrieves whatever happens to
