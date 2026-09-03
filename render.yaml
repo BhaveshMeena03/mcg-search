@@ -9,8 +9,17 @@ services:
   - type: web
     name: mcg-search
     runtime: python
-    plan: free
+    # Starter, not free, for the same reason marketbubble-search is:
+    # the free instance sleeps after ~15 minutes idle and the next
+    # visitor waits ~50s for a cold start BEFORE the answer even begins.
+    # This link gets sent to people who click it once and form a view.
+    #
+    # Drop to free if it is only ever for you.
+    plan: starter
+    # Pinned, so experimental work can live on a branch without any
+    # question about whether pushing it reaches what people are using.
     branch: main
+    autoDeploy: true
     buildCommand: pip install -r requirements.txt
     # One worker on the free plan. Answers are I/O-bound waiting on the
     # model, not CPU-bound, so concurrency comes from async rather than
