@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 EPISODES = ROOT / "data" / "episodes.json"
+EPISODE_INDEX = ROOT / "data" / "episode_index.json"
 
 app = FastAPI(title="MCG Search", docs_url=None, redoc_url=None)
 
@@ -64,24 +65,21 @@ async def health() -> dict:
 
 @app.get("/v1/episodes")
 async def episodes() -> dict:
-    """Titles and dates only.
+    """Titles and dates only, never the transcripts.
 
-    Deliberately not the transcripts: the full file is tens of megabytes
-    and the page only needs enough to list what is searchable.
+    Prefers the committed 85KB index so a deploy works from a clean
+    checkout — data/episodes.json is 19MB and deliberately gitignored,
+    since it is re-fetchable and the searchable copy is in Pinecone
+    anyway. Falls back to building the list from the full file on a
+    laptop that has one but has not run build_index_json yet.
     """
-    eps = load_episodes(EPISODES)
-    rows = [
-        {
-            "id": e["episode_id"],
-            "title": e["title"],
-            "url": e["url"],
-            "published_at": e.get("published_at"),
-            # Last segment's start is a good enough runtime, and free.
-            "seconds": int(e["segments"][-1]["t"]) if e.get("segments") else 0,
-        }
-        for e in eps
-    ]
-    rows.sort(key=lambda r: r["published_at"] or "", reverse=True)
+    if EPISODE_INDEX.exists():
+        rows = json.loads(EPISODE_INDEX.read_text())
+    elif EPISODES.exists():
+        from scripts.build_index_json import build
+        rows = build(load_episodes(EPISODES))
+    else:
+        return {"count": 0, "hours": 0, "episodes": []}
     total = sum(r["seconds"] for r in rows)
     return {"count": len(rows), "hours": round(total / 3600), "episodes": rows}
 

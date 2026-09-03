@@ -9,6 +9,9 @@ __pycache__/
 # Transcripts are large and re-fetchable from YouTube. The episode list is
 # worth keeping in the repo; the full caption text is not.
 data/episodes.json
+# but DO commit the slim index: 85KB, and it is what makes a deploy
+# work from a clean checkout. Rebuild with scripts/build_index_json.py
+!data/episode_index.json
 data/episodes.json.lock
 data/episodes.json.tmp
 

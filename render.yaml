@@ -1,0 +1,57 @@
+# Render deploy.
+#
+# This file, not app/config.py, is what decides production. A default in
+# the code is what runs on a laptop; a value here is what runs for
+# everybody else, and the two drifting apart is how you end up debugging
+# the wrong thing.
+
+services:
+  - type: web
+    name: mcg-search
+    runtime: python
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    # One worker on the free plan. Answers are I/O-bound waiting on the
+    # model, not CPU-bound, so concurrency comes from async rather than
+    # from processes.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /v1/health
+    envVars:
+      # sync: false means "set it in the dashboard, never in this file".
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: PINECONE_API_KEY
+        sync: false
+      # The usepod proxy URL carries its auth token in the path, so it is
+      # a secret and belongs in the dashboard too.
+      - key: ANTHROPIC_BASE_URL
+        sync: false
+
+      # These OVERRIDE the defaults in app/config.py.
+      - key: PINECONE_INDEX
+        value: mcg-search
+      - key: PINECONE_NAMESPACE
+        value: mcg
+      # Pin the upstream provider. Unpinned routes by price and landed on
+      # a failing relay: median 23.8s with a 100s outlier. Pinned, the
+      # same question ran 4.4s median in a good window.
+      - key: USEPOD_PROVIDERS
+        value: anthropic
+      # Off deliberately. Through the proxy a streamed call takes ~19s to
+      # reach its first token where the whole non-streamed call returns in
+      # ~4.4s, because the proxy buffers. Citations still go out early as
+      # their own SSE event.
+      - key: STREAM_ANSWERS
+        value: "false"
+
+      # NOT set: ANTHROPIC_API_KEY.
+      #
+      # usepod authenticates on the token inside ANTHROPIC_BASE_URL and
+      # documents the api_key as ignored, so there is nothing for a real
+      # Anthropic credential to do here except sit in an environment
+      # waiting to leak.
+      #
+      # The cost of leaving it out is that app/search.py has no fallback
+      # to Anthropic direct when the proxy fails — see PROXY_COOLDOWN_
+      # SECONDS. Set it here if that trade stops being worth it.
