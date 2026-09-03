@@ -9,13 +9,23 @@ services:
   - type: web
     name: mcg-search
     runtime: python
-    # Starter, not free, for the same reason marketbubble-search is:
-    # the free instance sleeps after ~15 minutes idle and the next
-    # visitor waits ~50s for a cold start BEFORE the answer even begins.
-    # This link gets sent to people who click it once and form a view.
+    # Free, kept awake by .github/workflows/keepwarm.yml.
     #
-    # Drop to free if it is only ever for you.
-    plan: starter
+    # A free instance sleeps after ~15 minutes idle and the next visitor
+    # then waits ~50s for a cold start BEFORE the answer even begins,
+    # which is a bad first impression for a link sent to people who
+    # click once. The workflow pings /v1/health every 10 minutes, and
+    # the free plan's 750 instance-hours covers one service running the
+    # whole month.
+    #
+    # The alternative was folding this into the bullpen-ai service to
+    # avoid a second bill. Not worth it: that service runs
+    # search.lexthedev.com, the X bot and two Discord bots, and a bad
+    # deploy here would take all of them with it. Isolation is the
+    # feature being bought.
+    #
+    # Move to starter if the pinger proves unreliable or traffic grows.
+    plan: free
     # Pinned, so experimental work can live on a branch without any
     # question about whether pushing it reaches what people are using.
     branch: main

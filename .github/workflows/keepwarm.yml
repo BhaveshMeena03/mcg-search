@@ -1,0 +1,30 @@
+name: keep warm
+
+# Render's free plan sleeps a service after ~15 minutes idle, and the
+# next visitor pays ~50 seconds of cold start before the answer even
+# starts. This keeps it awake so a link handed to somebody works the
+# first time they click it.
+#
+# Every 10 minutes is under the 15-minute idle window with room for a
+# late run. GitHub's scheduler is best-effort and can drift by a few
+# minutes, which is why the margin exists.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the health endpoint
+        run: |
+          # Health only. It touches no model and costs nothing, unlike
+          # pinging a search endpoint, which would run up a bill 144
+          # times a day to prove the box is on.
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 \
+            "${{ secrets.SERVICE_URL }}/v1/health")
+          echo "health returned $code"
+          # A cold start can outlast one request; the next run gets it.
+          [ "$code" = "200" ] || echo "not healthy yet, will retry next run"
