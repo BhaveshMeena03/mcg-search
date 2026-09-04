@@ -164,6 +164,27 @@ def check(tag: str, question: str, answer: str, hits: list
 
     cites = _TIMESTAMP.findall(answer)
 
+    # Does a cited moment actually exist in a retrieved passage?
+    #
+    # Added when the stamped copy stopped being stored and started being
+    # rebuilt from line start times. If that reconstruction ever drifts,
+    # every answer still looks right and every timestamp silently points
+    # somewhere else — the reader presses [16:16] and lands on the wrong
+    # moment, which is worse than no citation because it looks checked.
+    #
+    # A warning, not a failure: the model may legitimately cite the
+    # excerpt's `at` attribute or round a value, and a grader that cries
+    # wolf gets ignored.
+    if cites and hits:
+        stamped = " ".join((getattr(h, "text_ts", "") or "") for h in hits)
+        if stamped:
+            missing = [c for c in {x.strip("[]") for x in cites}
+                       if f"[{c}]" not in stamped]
+            if len(missing) == len(set(cites)) and missing:
+                warns.append(
+                    f"cited {missing[0]} but no retrieved line carries it "
+                    f"— check the timestamp reconstruction")
+
     # A refusal is the answer's STANCE, not a phrase somewhere in it.
     #
     # "wen clawpump" was answered — the Oct 1 winner date, cited — and

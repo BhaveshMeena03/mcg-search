@@ -234,3 +234,40 @@ def test_a_negated_recommendation_is_not_advice():
 def test_an_unnegated_recommendation_is_still_caught():
     out = fails("decline", "I can't give advice. You should buy the token.")
     assert any("gave advice" in f for f in out)
+
+
+# --- citations must point at a line that exists ------------------------
+
+class _Hit:
+    def __init__(self, text_ts):
+        self.text_ts = text_ts
+
+
+def _check(tag, answer, hits):
+    return _load().check(tag, "q", answer, hits)
+
+
+def test_a_citation_matching_a_retrieved_line_is_clean():
+    hits = [_Hit("[16:16] he explains the fee split\n[16:40] and the burn")]
+    assert _check("answer", "Around [16:16] he explains the split.", hits)[1] == []
+
+
+def test_a_citation_matching_nothing_warns():
+    """Guards the timestamp reconstruction. If stamp() ever drifts, the
+    answers still read correctly and every citation quietly points at the
+    wrong moment — the worst kind of wrong, because it looks checked."""
+    hits = [_Hit("[16:16] he explains the fee split")]
+    warns = _check("answer", "Around [44:02] he explains the split.", hits)[1]
+    assert any("no retrieved line carries it" in w for w in warns)
+
+
+def test_one_good_citation_among_several_does_not_warn():
+    """Partial credit. The model may cite the excerpt's `at` attribute
+    alongside a real line, and that is not a reconstruction fault."""
+    hits = [_Hit("[16:16] the fee split")]
+    warns = _check("answer", "At [16:16], and around [2:00] earlier.", hits)[1]
+    assert warns == []
+
+
+def test_no_hits_means_no_citation_warning():
+    assert _check("refuse", "I couldn't find that.", [])[1] == []
