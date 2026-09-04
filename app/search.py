@@ -203,30 +203,73 @@ def _windows(
     Windows overlap by a few segments so an answer that straddles a
     boundary is still retrievable.
     """
-    windows: list[tuple[float, str, str]] = []
+    windows: list[tuple[float, str, list[float]]] = []
     i = 0
     n = len(segments)
     while i < n:
         start_t = segments[i].t
         parts: list[str] = []
-        stamped_parts: list[str] = []
+        times: list[float] = []
         length = 0
         j = i
         while j < n and length + len(segments[j].text) + 1 <= max_chars:
             parts.append(segments[j].text)
-            stamped_parts.append(f"[{_timestamp(segments[j].t)}] {segments[j].text}")
+            times.append(segments[j].t)
             length += len(segments[j].text) + 1
             j += 1
         if j == i:  # single segment longer than max_chars — take it whole
-            clipped = segments[i].text[:max_chars]
-            parts.append(clipped)
-            stamped_parts.append(f"[{_timestamp(segments[i].t)}] {clipped}")
+            parts.append(segments[i].text[:max_chars])
+            times.append(segments[i].t)
             j = i + 1
-        windows.append((start_t, "\n".join(parts), "\n".join(stamped_parts)))
+        windows.append((start_t, "\n".join(parts), times))
         if j >= n:
             break
         i = max(j - overlap_segments, i + 1)
     return windows
+
+
+def pack_times(line_times: list[float]) -> str:
+    """Line start times as a compact string, e.g. "0,7,14,21".
+
+    Pinecone metadata takes a string, number, boolean or list of
+    strings — a list of floats is rejected with a 400. A comma-joined
+    string of whole seconds is both legal and the smallest form, and
+    nothing is lost: _timestamp() truncates to the second anyway, and
+    the deep link uses the window's own start_seconds, which is stored
+    separately as a number.
+    """
+    return ",".join(str(int(t)) for t in line_times)
+
+
+def stamp(text: str, line_times) -> str:
+    """Rebuild the per-line timestamped copy from the text and its times.
+
+    This used to be stored alongside the text as `text_ts` — the same
+    words a second time, with "[12:34] " in front of each line. Every
+    query pulls 50 rerank candidates, so that duplicate was travelling
+    on every search: ~234KB per question, against a metadata payload
+    that is otherwise half the size.
+
+    Retrieval and reranking never read the stamped copy. Only the answer
+    does. So store the line start times, about a hundred bytes, and
+    rebuild it here.
+
+    Falls back to the plain text when the times are missing or do not
+    line up, which is what makes vectors written before this change keep
+    working.
+    """
+    if not line_times:
+        return text
+    if isinstance(line_times, str):
+        try:
+            line_times = [float(x) for x in line_times.split(",") if x]
+        except ValueError:
+            return text
+    lines = text.split("\n")
+    if len(lines) != len(line_times):
+        return text
+    return "\n".join(f"[{_timestamp(t)}] {line}"
+                     for t, line in zip(line_times, lines, strict=True))
 
 
 PLACEHOLDER_KEY = "unused-auth-is-in-the-base-url"
@@ -434,7 +477,7 @@ class MCGIndex:
     async def ingest(self, episodes: list[Episode]) -> int:
         rows: list[dict] = []
         for ep in episodes:
-            for start_t, text, stamped in _windows(
+            for start_t, text, line_times in _windows(
                 ep.segments, self._settings.chunk_max_chars, overlap_segments=2
             ):
                 rows.append({
@@ -443,8 +486,13 @@ class MCGIndex:
                     "url": ep.url,
                     "start_seconds": start_t,
                     "text": text,
-                    # Never embedded, never shown to a reader — see _windows.
-                    "text_ts": stamped,
+                    # The start time of each line, so the timestamped copy
+                    # can be rebuilt at answer time. This replaced storing
+                    # the whole stamped string: it was the same words a
+                    # second time, and every query drags 50 rerank
+                    # candidates across the wire. ~100 bytes instead of
+                    # ~2400. See stamp().
+                    "line_times": pack_times(line_times),
                     # Pinecone metadata rejects None, so undated episodes
                     # omit the key entirely rather than storing a null.
                     **({"published_at": ep.published_at}
@@ -536,9 +584,11 @@ class MCGIndex:
                 timestamp=_timestamp(start),
                 deep_link=_deep_link(md.get("url", ""), start),
                 text=md.get("text", ""),
-                # Falls back to the plain text so vectors written before
-                # text_ts existed still answer, just with a coarser citation.
-                text_ts=md.get("text_ts") or md.get("text", ""),
+                # Rebuilt from the line times. Vectors written before this
+                # change still carry text_ts, so prefer that when present
+                # and neither copy needs a re-ingest to keep working.
+                text_ts=(md.get("text_ts")
+                         or stamp(md.get("text", ""), md.get("line_times"))),
                 published_at=md.get("published_at"),
                 score=match.score,
             ))
