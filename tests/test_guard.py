@@ -87,3 +87,27 @@ def test_first_window_id_survives_an_episode_with_no_segments():
     ep = Episode(episode_id="empty", title="t", url="https://x/watch?v=1",
                  segments=[])
     assert len(ingest.first_window_id(ep)) == 32
+
+
+# --- the scheduled sync is guarded like the manual ingest ---------------
+
+def test_the_sync_script_checks_the_target_too():
+    """A scheduled job writing to the wrong index is worse than a manual
+    one, because nobody is watching when it happens."""
+    src = (ROOT / "scripts" / "sync_new.py").read_text()
+    assert "check_target(settings)" in src
+
+
+def test_the_sync_script_writes_transcripts_before_indexing():
+    """Fetching is the slow, rate-limited, blockable half. If indexing
+    dies after it, the fetch must not have to happen again."""
+    src = (ROOT / "scripts" / "sync_new.py").read_text()
+    assert src.index("merge(fetched, DATA)") < src.index("idx.ingest")
+
+
+def test_the_sync_script_refreshes_the_page_index():
+    """data/episode_index.json is what a deploy serves. A sync that adds
+    episodes to Pinecone but not to that file makes the page disagree
+    with what is searchable."""
+    src = (ROOT / "scripts" / "sync_new.py").read_text()
+    assert "SLIM.write_text" in src

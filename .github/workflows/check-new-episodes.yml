@@ -1,0 +1,48 @@
+name: check for new episodes
+
+# Only the LISTING half. From a datacenter IP YouTube refuses the video
+# download with a bot check, but listing the channel works — measured on
+# the Market Bubble project, where a CI run listed a new episode fine
+# and was then refused the captions.
+#
+# So this notices new episodes and fails loudly; the actual fetch runs
+# from the laptop via deploy/com.mcgsearch.sync.plist. This is the
+# backstop for when that machine is off.
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yt-dlp
+      - name: Compare the channel against what is indexed
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys, pathlib
+          have = {e["id"] for e in json.loads(
+              pathlib.Path("data/episode_index.json").read_text())}
+          out = subprocess.run(
+              ["yt-dlp", "--flat-playlist", "--print", "%(id)s",
+               "--playlist-end", "40",
+               "https://www.youtube.com/@MCG_live/videos"],
+              capture_output=True, text=True)
+          ids = [x.strip() for x in out.stdout.splitlines() if x.strip()]
+          if not ids:
+              print("listing failed:", out.stderr.strip()[-300:])
+              sys.exit(0)          # not a real failure, just no signal
+          new = [v for v in ids if v not in have]
+          print(f"{len(ids)} listed, {len(have)} indexed, {len(new)} new")
+          if new:
+              print("NEW:", ", ".join(new))
+              print("Run this on the laptop:")
+              print("  .venv/bin/python scripts/sync_new.py")
+              sys.exit(1)
+          PY

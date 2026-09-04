@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Daily check for new MCG episodes.
+
+  Install:
+    cp deploy/com.mcgsearch.sync.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.mcgsearch.sync.plist
+
+  Run it once now, without waiting for the schedule:
+    launchctl start com.mcgsearch.sync
+
+  Stop it:
+    launchctl unload ~/Library/LaunchAgents/com.mcgsearch.sync.plist
+
+  Why here and not on CI: from a datacenter IP YouTube answers "Sign in
+  to confirm you're not a bot" for the video download, though the
+  channel listing still works. This machine has a residential IP, so
+  the fetch succeeds. The GitHub Action in .github/workflows only does
+  the listing half, as a backstop for when this laptop is off.
+
+  RunAtLoad catches up after the machine has been asleep, which for a
+  laptop is most of the reason a daily job misses a day.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mcgsearch.sync</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/akhileshmeena/mcg-search/.venv/bin/python</string>
+    <string>/Users/akhileshmeena/mcg-search/scripts/sync_new.py</string>
+  </array>
+
+  <!-- The script reads .env relative to the repo root. -->
+  <key>WorkingDirectory</key>
+  <string>/Users/akhileshmeena/mcg-search</string>
+
+  <!-- MCG streams Tuesday and Thursday at 12:30 EST. 09:30 local picks
+       up the previous day's episode without racing the upload. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/akhileshmeena/mcg-search/data/sync.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/akhileshmeena/mcg-search/data/sync.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- yt-dlp needs a JS runtime to solve YouTube's challenge, and a
+         launchd job inherits none of a shell's PATH. -->
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+</dict>
+</plist>
