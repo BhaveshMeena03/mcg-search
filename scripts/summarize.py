@@ -28,6 +28,7 @@ from app.schemas import Episode  # noqa: E402
 from app.search import MCGIndex  # noqa: E402
 from app.summaries import (  # noqa: E402
     SUMMARY_PROMPT,
+    looks_misattributed,
     parse,
     stamped_transcript,
     validate,
@@ -96,6 +97,10 @@ async def summarize_one(idx: MCGIndex, episode: Episode,
     topics = validate(topics, episode)
     if not tldr or not topics:
         log(f"  unusable output: {episode.title[:50]}")
+        return None
+    if looks_misattributed(tldr):
+        # Rather than ship a TL;DR whose first word is a wrong name.
+        log(f"  misattributed opening, skipping: {episode.title[:44]}")
         return None
     return {"tldr": tldr, "topics": topics, "model": response.model}
 

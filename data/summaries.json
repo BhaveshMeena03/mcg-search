@@ -2374,5 +2374,1531 @@
    }
   ],
   "model": "anthropic/claude-haiku-4.5"
+ },
+ "iUVxxnoZH10": {
+  "tldr": "EasyA Ecosystem Day features rapid-fire interviews with founders launching AI agents, prediction markets, and crypto infrastructure projects on the EasyA Kickstart launchpad. Hosts discuss how tokens are no longer VCs' blocker for funding when backed by strong founders and real business models, highlighting the shift toward founders using tokens for distribution and early product-market fit before scaling.",
+  "topics": [
+   {
+    "t": 180,
+    "text": "EasyA Kickstart is now second to Pump Fun in 7-day launchpad revenue, validating the platform's ability to compete with established competitors"
+   },
+   {
+    "t": 1843,
+    "text": "Tokens function as coordination mechanisms and communication layers, allowing early backers exposure to very early-stage ideas while solving the problem of teacher-student wealth asymmetry"
+   },
+   {
+    "t": 2431,
+    "text": "Strong founder pipeline is the primary defense against pitfalls of previous ICM launchpads—EasyA sources from Harvard, Cambridge, and other elite institutions"
+   },
+   {
+    "t": 2549,
+    "text": "Founder education conversations focus on matching token structures to specific use cases: in-game currency, data labeling incentives, or fee discounts rather than forcing one-size-fits-all models"
+   },
+   {
+    "t": 2815,
+    "text": "Infera is building a GPU compute marketplace with Chainlink oracle integration to create on-chain price discovery for compute as an asset class"
+   },
+   {
+    "t": 3040,
+    "text": "Covenant Foundation improved Terminal Bench to 100% by adapting their agentic governance framework to task size, using only necessary code for smaller tasks"
+   },
+   {
+    "t": 3335,
+    "text": "Covenant's strategic investment fund grew from $3,000 to $26,000 USD in one week through trading fees, funding ventures like Allie (personal AI secretary using governance for PII protection)"
+   },
+   {
+    "t": 3938,
+    "text": "Bit Agents' DCA agent processed nearly 5,000 transactions in its first week, with 0.05% fee structure and premium token holder benefits for access to future agents"
+   },
+   {
+    "t": 4320,
+    "text": "World Colony visualizes AI agent swarms debating predictions, with agents that underperform removed from the colony in a self-improving evolutionary system"
+   },
+   {
+    "t": 4554,
+    "text": "World Colony won EasyA's World Cup hackathon and plans to launch TX Odds hackathon for $50,000 prize to build consumer-facing World Cup prediction market using ant colony mechanics"
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "cjNOcfA7Jys": {
+  "tldr": "NockChain is a hard money network secured by useful proof of work—computation that simultaneously secures the blockchain and performs real AI inference for data centers. Founder Logan discusses how NockChain aims to become the base layer for compute markets by incentivizing idle datacenter hardware to mine the network while providing useful work, with an AI compute network launching in early July alongside merge-mining compatibility with Pearl.",
+  "topics": [
+   {
+    "t": 70,
+    "text": "Useful proof of work networks solve mathematical equations that are also useful for AI and data center operations simultaneously."
+   },
+   {
+    "t": 110,
+    "text": "NockChain just listed on Kraken with a new market maker after volume spike on Base in October."
+   },
+   {
+    "t": 318,
+    "text": "Founder Logan worked on Urbit's Nock VM instruction set starting in 2018, then founded Zorp in 2022 to build zero-knowledge proofs using the Nock virtual machine."
+   },
+   {
+    "t": 1030,
+    "text": "Zero-knowledge proofs let you prove a computation happened and outputs are correct without revealing private details, compressible into tiny files for fast verification."
+   },
+   {
+    "t": 1700,
+    "text": "In 2023 Zorp achieved zero-knowledge proofs 10 times faster than RISC-V, prompting Logan to pivot toward incentivizing ZK proof hardware via proof of work."
+   },
+   {
+    "t": 1744,
+    "text": "Data centers only utilize hardware 35 to 45 percent of the time; the rest sits idle or mines other cryptocurrencies like BitTensor and Geonet."
+   },
+   {
+    "t": 1950,
+    "text": "NockChain enables merge mining with Pearl simultaneously, allowing data center operators to double-dip mining rewards from both networks."
+   },
+   {
+    "t": 2706,
+    "text": "NockChain launched May 21, 2025 as 'Dumbnet' with non-useful ZK proofs; currently has 10,000 to 20,000 consumer GPUs mining, expected to grow 5 to 10 times after July AI compute network launch."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "hblm3QvONP0": {
+  "tldr": "c0mpute is a decentralized AI inference network where users can run private, uncensored models on idle GPUs across the world. Founder Leighton, a 21-year-old electrical engineer, built sharding technology that splits large models across multiple consumer GPUs—solving the latency problem that previously made decentralized inference impractical—allowing enterprises to access frontier-quality AI models cheaply and privately for the first time.",
+  "topics": [
+   {
+    "t": 90,
+    "text": "Founder Leighton started c0mpute in January after his $200 Claude subscription kept going down for hours, realizing millions of idle GPUs worldwide could provide cheaper, private AI inference."
+   },
+   {
+    "t": 313,
+    "text": "Sharding splits large language model layers across multiple consumer GPUs instead of running on one device, but single tokens moving through the network created latency problems."
+   },
+   {
+    "t": 514,
+    "text": "Speculative decoding solves the latency issue: a small draft model predicts multiple tokens at once in a batch, then other workers verify correctness instead of processing one token sequentially."
+   },
+   {
+    "t": 1447,
+    "text": "c0mpute has been live for about 20 days and grown from 10 workers (including the founder) to 80 workers online, with peaks reaching over 100 workers."
+   },
+   {
+    "t": 1680,
+    "text": "Partnership with Use Pod lets stakers of the $ZERO token sell their daily inference allowance to users who want to buy compute on a marketplace."
+   },
+   {
+    "t": 1741,
+    "text": "Staking $ZERO token provides daily inference credits weighted by stake amount, and workers who stake get 80% revenue share versus 70% for non-stakers, with remainder funding the treasury."
+   },
+   {
+    "t": 1870,
+    "text": "$ZERO token ran to 12 million market cap generating substantial fees, putting the treasury in a massive surplus; Leighton spends approximately $200 daily renting GPUs on Vast.ai for testing the sharding engine."
+   },
+   {
+    "t": 2191,
+    "text": "Leighton chose Solana because it's where he made the most money and feels at home, and the $ZERO token is on Solana while the compute network runs separately from the blockchain."
+   },
+   {
+    "t": 2437,
+    "text": "The entire codebase is open source, allowing people to verify claims and fork the project; Leighton expects copycats to fail if they merely extract token value without building a real product."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "n7e9g4HrzSo": {
+  "tldr": "Ted Livingston discusses Flipcash, a Solana-based platform where users create and spend their own currencies like physical cash. After 17 years building Kin and other payment products, Livingston's key insight is combining community currencies with actual spending utility and a novel liquidity model (the Reserve) that guarantees predictable conversion rates—solving the thin-liquidity problem that plagues other memecoins.",
+  "topics": [
+   {
+    "t": 20,
+    "text": "Flipcash is only possible on Solana; the phrase 'only possible on Solana' originated from the team's product experience."
+   },
+   {
+    "t": 56,
+    "text": "Ted Livingston's 17-year journey: dropped out of college to start Kik messenger (1 million users in 15 days), launched Kin token in 2017 as first token to migrate to Solana, then built a USDC payment app that failed."
+   },
+   {
+    "t": 204,
+    "text": "Flipcash uses a Reserve smart contract as an on-chain bank managing all currency supply and USDF backing, enabling instant currency creation and spending with no DEX graduation required."
+   },
+   {
+    "t": 730,
+    "text": "The pricing curve: first token sells for 1 penny, subsequent tokens increase by ~0.001 cents each, creating gradual growth; buying 95% supply costs 500 billion USDF on Flipcash versus 60k SOL on Pump.fun."
+   },
+   {
+    "t": 1340,
+    "text": "Flipcash uses USDF, a custom stablecoin built with Coinbase, backed by a bonding curve rather than 1:1 USD backing, creating stability while allowing appreciation as adoption grows."
+   },
+   {
+    "t": 1432,
+    "text": "Physical cash experience: users design their currency bill, pull out exact amounts (e.g. $5.62), scan via QR code with end-to-end encryption and secret-sharing to ensure security without server interception."
+   },
+   {
+    "t": 1752,
+    "text": "Layer 2 solves Solana's 40-cent token account rent by compressing token accounts (similar to compressed NFTs), allowing millions of currencies without unsustainable rent costs."
+   },
+   {
+    "t": 2160,
+    "text": "Flipcash Reserve liquidity is guaranteed: a $100 balance means the Reserve will buy back all tokens for $100 USDF minus 1% fee, solving the unknown slippage problem of thin-liquidity DEX coins."
+   },
+   {
+    "t": 2370,
+    "text": "Early adoption: Jeffy currency has 316 holders (minimum $10 USD balance), Mooney 200K holders; Ted offering to retweet and buy $10 of any new currency created in next 6 hours."
+   },
+   {
+    "t": 2747,
+    "text": "Privacy: currently implemented via layer 2 obfuscation (block explorer cannot see transactions); full privacy improvements planned as adoption scales, with app fully open-source to enable multiple wallet implementations."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "pmC_dcjTYa0": {
+  "tldr": "Gym Showdown is a blockchain game where players battle to win real, redeemable Pokemon trading cards stored on Collector Crypt. The founder discusses how the platform gamifies card collecting by combining PvP battles, gacha mechanics, and an open world, creating what he calls the infrastructure layer for TCG gaming on Solana—with plans to expand beyond Pokemon to other card ecosystems like One Piece.",
+  "topics": [
+   {
+    "t": 65,
+    "text": "Gym Showdown built on Collector Crypt's white-labelled product, allowing players to win and lose real physical Pokemon cards through in-game gameplay."
+   },
+   {
+    "t": 240,
+    "text": "The founder has been in crypto for five years, discovered Collector Crypt two years before Metaplex launch, and had 60 cards sitting idle in wallet with no utility."
+   },
+   {
+    "t": 545,
+    "text": "$400,000 in Pokemon cards paid out to players, 1,500 total players, approximately 200 actively winning, 8,000 battles played."
+   },
+   {
+    "t": 1260,
+    "text": "One-versus-one battles cost $25 entry fee with positive expected value card payouts; players win a card worth more than the entry fee in either outcome."
+   },
+   {
+    "t": 1455,
+    "text": "Slab Arena is a PvP mode where players stake multiple cards simultaneously, with win probabilities adjusted based on total insured value of cards in play."
+   },
+   {
+    "t": 1914,
+    "text": "The founder decided to launch a token because token marketing drives user acquisition to the game itself, similar to Collector Crypt's strategy."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "XTRyPJ5s0mg": {
+  "tldr": "BloxAPI is a game development studio and platform helping creators build and monetize games on Roblox through AI-assisted tools and plugins. Founder Davey, an experienced game developer with decades of background including AAA titles, discusses how AI has transformed game development, making coding skills less critical than design and planning. The most striking insight: Roblox paid out $1.5 billion to developers last year, with top creators earning over $1 million annually, and BloxAPI won $250,000 in Pump Fun's hackathon to build infrastructure solving monetization, discovery, and verification problems in this massive but chaotic ecosystem.",
+  "topics": [
+   {
+    "t": 127,
+    "text": "Davey's background: coded since the 1980s, worked on AAA MMOs including Lord of the Rings Online and D&D Online at Turbine/Warner Brothers, runs a 100,000-member game developer Facebook group."
+   },
+   {
+    "t": 315,
+    "text": "AI has made coding experience 'absolutely worthless'—design and communication now matter more than syntax; developers can no longer hide behind claiming hard problems take time."
+   },
+   {
+    "t": 724,
+    "text": "Roblox paid out $1.5 billion to developers last year, with 150 million daily active users, instant monetization, no networking required, and ecosystem expanding beyond child players into older demographics and AAA-quality games."
+   },
+   {
+    "t": 921,
+    "text": "Blocks Builder platform creates an orchestrated AI team (lead dev, artist, coder) that generates game design documents, task lists, monetization mockups, and marketing assets to guide developers through building without guesswork."
+   },
+   {
+    "t": 1596,
+    "text": "Chain Connect plugin puts Roblox game data on blockchain to prevent scams in game acquisitions by allowing creators to verify numbers, spend, sessions, and match outcomes in deals tracked on Discord and X."
+   },
+   {
+    "t": 1659,
+    "text": "Won Pump Fun hackathon with $250,000 after answering extensive questions about business model, revenue streams, and tokeconomics—funding going toward marketing, plugin development (Trust Connect, Stream Connect, Chain Connect, Hero AI), and testing four games in production."
+   },
+   {
+    "t": 2010,
+    "text": "Stream Connect plugin shows streamer viewer count over head in-game and enables game mechanics based on viewer count, creating viral feedback loops by making games attractive to content creators."
+   },
+   {
+    "t": 2125,
+    "text": "350 users applied to test platform; two of three plugins released in last six months; built Kitten Empire game in one week using Blocks Builder, testing monetization via Roblox ad system."
+   },
+   {
+    "t": 2183,
+    "text": "Blocks token currently required to buy credits on platform; Stripe integration planned later; token utility will expand to other game engines beyond Roblox and a 'massive' unreleased product launching in fall."
+   },
+   {
+    "t": 2358,
+    "text": "Top 300 Roblox creators have earned over $1 million each per year; Davey's 13-year-old son Jack won Bags hackathon with $10,000 prize."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "IZM-ra0c1mo": {
+  "tldr": "Surplus is an open marketplace for AI inference that lets buyers access cheaper compute and sellers monetize excess capacity, currently routing 2 billion input tokens daily at a 60% median discount. Founder Mac discussed how the project bootstrapped through a community-launched token and DM arbitrage, now exploring token utility models while maintaining 2-3 months runway and preparing AWS migration to scale partnerships.",
+  "topics": [
+   {
+    "t": 0,
+    "text": "Inference described as 'the new oil' with VC-subsidized services like Claude Code creating opportunities for resale at heavy discounts"
+   },
+   {
+    "t": 135,
+    "text": "Mac's background: cognitive science PhD studying prediction markets, traded DeFi in 2021, worked as data scientist at Pinterest, Cash App, and Coinbase on the Base team"
+   },
+   {
+    "t": 410,
+    "text": "Surplus evolved from three failed iterations: reselling API keys with prepayment friction, energy tokens for prediction market chat with supply constraints, converging on open spot market model"
+   },
+   {
+    "t": 605,
+    "text": "Current inference landscape: frontier models like Claude and GPT have poor pay-as-you-go rates for small volume, bulk discounts require volume commitments that go unused, creating arbitrage for Surplus"
+   },
+   {
+    "t": 960,
+    "text": "Surplus metrics in week three: 240 models, 7,200 suppliers, 420,000 requests, 13 billion tokens routed; number 8 by transaction count on Base chain in last 28 days"
+   },
+   {
+    "t": 1020,
+    "text": "Token was community-launched via Banker by anonymous address; Mac initially hesitant but embraced it after community organically promoted the project"
+   },
+   {
+    "t": 1200,
+    "text": "DM represents significant portion of Surplus supply; 60% median discount means 40 cents per dollar, yielding roughly 10% annual return: 0.4 × 365 ÷ DM token price"
+   },
+   {
+    "t": 1380,
+    "text": "Approximately 7-10% of daily consumed DM tokens flow through Surplus, roughly 7% of total DM supply; Mac plans to find supply beyond DM to scale beyond this ceiling"
+   },
+   {
+    "t": 1560,
+    "text": "AWS migration from Vercel happening 'tonight' to support higher scale and enable partnership onboarding; currently paying gas fees out of pocket for all on-chain transactions"
+   },
+   {
+    "t": 1800,
+    "text": "Competitive advantage over OpenRouter: Surplus offers cheaper prices than direct provider rates, has community token stake, positions itself as DEX aggregator across inference exchanges"
+   },
+   {
+    "t": 2050,
+    "text": "Two to three months runway from token sales; team taking significant compensation in token; exploring equity models similar to Pop Punk's approach of bringing token holders onto cap table"
+   },
+   {
+    "t": 2400,
+    "text": "No revenue currently; fee switch can be turned on anytime, with revenue projected as percentage of $1,000-2,000 daily payment volume; prioritizing user growth over fees"
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "UjN2VkSlDz4": {
+  "tldr": "GitLab is a decentralized Git platform built for AI agents, featuring Open Cloud (a forked Claude codebase), Open Gateway (inference token marketplace), and Playground (no-code app builder). Founder Kevin, a full-stack engineer, reveals the project grew from zero to 29K GitHub stars in three months with 15K registered users, 133 developer contributors, partnerships with Alibaba and Xiaomi, and revenue from subscriptions and inference tokens that fund token buybacks.",
+  "topics": [
+   {
+    "t": 180,
+    "text": "GitHub infrastructure was built 20 years ago for humans; it cannot handle multiple AI agents coding, pushing commits, and deploying repositories simultaneously."
+   },
+   {
+    "t": 304,
+    "text": "Open Cloud forked Claude's leaked source code, mirrored it on GitLab's decentralized platform to survive Anthropic's DMCA takedown on GitHub, and grew to 29.1K stars with 205 downloads."
+   },
+   {
+    "t": 778,
+    "text": "GitLab ecosystem includes Open Gateway (inference tokens), Open Cloud (coding harness), and Playground (no-code platform); revenue comes from subscriptions and token consumption via fiat or XRP42."
+   },
+   {
+    "t": 1284,
+    "text": "GitLab nodes feature built-in economy with bounty system where AI agents can earn GitLab tokens by fixing bugs posted autonomously on repositories."
+   },
+   {
+    "t": 1508,
+    "text": "GitLab has bought back and burned approximately 20K tokens worth of GitLab value, with 75% of 15K registered users being daily active users."
+   },
+   {
+    "t": 1611,
+    "text": "Partnership with Gravity AI enables ads during 10-15 second AI processing windows in Playground; users earn credits redeemable for Open Gateway inference."
+   },
+   {
+    "t": 1748,
+    "text": "Founder received outreach from three VCs but will not do OTC deals or paid calls; strategy prioritizes protecting token holders while raising funding."
+   },
+   {
+    "t": 1860,
+    "text": "The founder believes AI agent adoption will accelerate faster than smartphone adoption, with agents handling trading, purchasing, transactions, and coding across all industries within 6-12 months."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "2Z-jZsN3TNQ": {
+  "tldr": "Pumpcade is a prediction market platform with autonomous instant resolution, built on Solana. Founder Pop Punk discusses raising $6 million from Jump Crypto and Foundation Capital, implementing an ACE round for token holder equity access, and an upcoming sports betting product that resolves markets in as little as one minute—the most surprising element being their claim that instant resolution and API access could make them the resolution engine for other prediction markets.",
+  "topics": [
+   {
+    "t": 20,
+    "text": "Pumpcade raised $6 million in seed funding from Jump Crypto and Foundation Capital, after an earlier pre-seed round, bringing total raised to approximately $6 million."
+   },
+   {
+    "t": 541,
+    "text": "The ACE round converted 6-7% of total token supply to SAFE notes, locking up approximately $1 million in token value for one year as equity access for token holders."
+   },
+   {
+    "t": 1509,
+    "text": "Pumpcade's core product resolves prediction markets instantly and autonomously using only verifiable data sources, with markets as short as 60 seconds on tokens, stocks, commodities, and sports."
+   },
+   {
+    "t": 1920,
+    "text": "Congestion fees on a curve prevent late arbitrage: as markets approach resolution and outcomes become known, fees increase to discourage last-second bets and fund platform rewards."
+   },
+   {
+    "t": 2535,
+    "text": "Pumpcade is building iOS and Android apps with fiat onboarding via debit card, abstracting away crypto entirely from the user interface for mainstream adoption."
+   },
+   {
+    "t": 2757,
+    "text": "Sports markets launching within two weeks with granular data including ball position coordinates and pitch locations; World Cup announcement coming within one week."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "JOl0gQF3kDU": {
+  "tldr": "LienFi is an onchain yield marketplace tokenizing US property tax liens, backed by real estate collateral. Founder Michael Lee brings 15+ years of traditional finance expertise in tax liens and is launching a platform that allows retail and institutional investors to access yields of 10-18% through these instruments. The surprising angle: tax liens are a $6-8 billion annual market that most major asset managers ignore because it's too small, giving LienFi a unique, defensible niche.",
+  "topics": [
+   {
+    "t": 0,
+    "text": "Host introduces LienFi as an RWA (real-world assets) project bringing traditional markets onchain, noting RWA had previous hype cycles but LienFi appears substantive."
+   },
+   {
+    "t": 126,
+    "text": "Michael Lee's background: finished finance degree in 2008 during financial crisis, worked 10 years in traditional hedge funds and private equity, then founded Gondola Capital in 2019 to bring institutional crypto allocation expertise to the space."
+   },
+   {
+    "t": 519,
+    "text": "Lee discovered tax liens through a multi-family office contact in Maryland and subsequently launched a tax lien fund in 2019 with $100+ million in assets under management from institutional allocators over five years."
+   },
+   {
+    "t": 901,
+    "text": "Tax lien mechanics: when property owners miss taxes, counties auction the delinquent tax obligation; investors bid down the interest rate (statutory, set by law, typically 18% in Florida/New Jersey); most liens redeem with interest and penalty within three years."
+   },
+   {
+    "t": 1500,
+    "text": "Tax liens are backed by the underlying property and sit senior to mortgages; 99% redeem with interest, not resulting in property acquisition; they generate predictable, consistent yield with no correlation to traditional assets."
+   },
+   {
+    "t": 2433,
+    "text": "Market size: $6-8 billion in new tax liens issued annually across US counties; $25 billion in outstanding delinquent taxes at any given time; but only 13% of liens screened in Florida auctions meet LienFi's quality criteria."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "JJ46DZb830w": {
+  "tldr": "BunnyOS is a Base-powered AI agent terminal that helps humans execute on-chain transactions through natural language, launched on Virtuals Protocol. Adam, a 2x founder and former VC, argues that AI agents are crypto's breakthrough user class—potentially billions of them needing payments, identity, and contract execution without traditional financial infrastructure—and that Bunny OS bridges the gap between human-provided alpha (via 'bunnies' creator-operated agents) and actionable transactions, currently the second-most-used app on Base's MCP server.",
+  "topics": [
+   {
+    "t": 335,
+    "text": "Adam's background: two exits from Web3 startups (SubX, and a bootstrapped crypto company), VC experience at a Web3 firm, MBA with finance specialization."
+   },
+   {
+    "t": 408,
+    "text": "Crypto VC thesis: early blockchain narratives have not proven out; AI companies reaching liquidity events will flow capital back into crypto once they IPO."
+   },
+   {
+    "t": 518,
+    "text": "AI agents as the solution to crypto adoption: next 1 billion users will be AI agents needing payment, identity, and contract signing capability—solving what humans never provided."
+   },
+   {
+    "t": 909,
+    "text": "BunnyOS origin: started as venture-backed autonomous DeFi agent project with yield optimization and prediction market agents, but pivoted to open-source nonprofit after realizing business incentives didn't align at scale."
+   },
+   {
+    "t": 1094,
+    "text": "BunnyOS product: AI terminal on Base that researches tokens and recommends on-chain actions; users retain control by signing transactions; currently second-most-popular software on Base MCP."
+   },
+   {
+    "t": 1534,
+    "text": "Semi-autonomous design: Bunny OS runs in background but requires human approval to sign transactions; roadmap includes graduated autonomy where users can grant partial signing permissions to agents over time."
+   },
+   {
+    "t": 1841,
+    "text": "Bunny Exchange marketplace: users purchase 'bunnies' (operator-run agents) that push actions directly to their inbox; operators can be individuals, AI agents, robots, or combinations; 2.5% transaction fee paid in OS tokens."
+   },
+   {
+    "t": 2628,
+    "text": "OS token economics: nonprofit model with revenue from 2.5% transaction fees on Bunny Exchange paid in OS tokens; additional revenue stream launching this week; Bonding curve mechanism similar to friend.tech locks OS tokens in smart contracts."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "ZOYjiEuQ0zg": {
+  "tldr": "Ore is a Solana-based store-of-value token launched by Hard Hat Chad, designed to provide Bitcoin-like properties (fixed supply, programmatic emissions) on a DeFi-enabled chain. The founder argues that proof-of-work creates unsustainable value leaks and has moved to \"grid mining,\" where users deploy SOL across a 5x5 grid and earn ore when their square wins each round; the most striking claim is that Ore addresses quantum computing risks to Bitcoin through quantum-resistant key pairs, a threat he believes materializes in 7-8 years.",
+  "topics": [
+   {
+    "t": 241,
+    "text": "The founder worked at Uber on payment systems and grew disillusioned with Bitcoin's centralization on exchanges like Binance, inspiring the idea to recreate Bitcoin as a Solana smart contract rather than bridge it."
+   },
+   {
+    "t": 818,
+    "text": "Ore abandoned real proof-of-work in August 2024 because miners spending fiat on electricity creates a value leak where token holders effectively subsidize electricity costs, forcing miner token sales that deplete value."
+   },
+   {
+    "t": 1231,
+    "text": "Grid mining V3 replaced proof-of-work: users deploy SOL across 25 squares, one square wins each minute and receives 1 ore, 10% of losing SOL goes to protocol as revenue (swapped to ore and 90% burned, 10% to stakers), rest returned to miners."
+   },
+   {
+    "t": 1501,
+    "text": "Unrefined ore held longer earns higher refining yield: a 10% fee on claiming mining rewards gets redistributed to other unrefined ore holders, incentivizing longer holding and yielding 50-70% APR currently."
+   },
+   {
+    "t": 1717,
+    "text": "V4 rollout removes the parimutuel payout system to reduce perception of gambling and user churn from inexperienced miners losing all capital; UI stays similar but mechanics change to make winning less random."
+   },
+   {
+    "t": 2340,
+    "text": "Ore emission rate is fixed at 1 ore per minute since launch; net inflationary currently with occasional deflationary periods when the motherlode jackpot is high and drives more deployment revenue."
+   },
+   {
+    "t": 2746,
+    "text": "Token price follows revenue reflexively but weakly: miners mine for emissions, so higher ore price drives more SOL deployment and revenue, but the feedback loop eventually breaks and reverses."
+   },
+   {
+    "t": 3814,
+    "text": "Ore uses privacy cache for shield pool transfers (largest on Solana) but mining itself is not blind; the community decided blind mining was unnecessary complexity that didn't solve a real problem."
+   },
+   {
+    "t": 3845,
+    "text": "Quantum computers pose real risk within 7-8 years: older Bitcoin UTXOs and key pairs are vulnerable because quantum computers can derive private keys from public keys, threatening Satoshi's coins and network trust."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "LavI0vk9ftk": {
+  "tldr": "SunriseDeFi, led by founder Ratchet, launched SpaceX tokenized stock on Solana within hours of the NASDAQ IPO, demonstrating crypto's speed advantage over traditional finance; the platform aims to democratize access to US equities and other assets globally through on-chain trading, with plans to expand to commodities, additional IPOs, and collectibles like Pokémon cards.",
+  "topics": [
+   {
+    "t": 40,
+    "text": "SunriseDeFi enables on-chain exposure to the SpaceX IPO, allowing users globally including in India to buy tokenized shares on Solana."
+   },
+   {
+    "t": 135,
+    "text": "SpaceX IPO priced at $135 pre-market, then NASDAQ determined final price through accumulated orders and demand matching; Solana listed it within 10 minutes versus traditional markets' multi-hour delay."
+   },
+   {
+    "t": 242,
+    "text": "Backpack Securities issues the tokenized SpaceX shares as redeemable for actual shares; users can transfer them to US brokerage accounts like Charles Schwab."
+   },
+   {
+    "t": 617,
+    "text": "SunriseDeFi manages liquidity across Solana DEXs including Jupiter, Meteora, Orca, and Raydium for the SPCX token."
+   },
+   {
+    "t": 1052,
+    "text": "The founder compares tokenized equities to stablecoins: both globally accessible without KYC to trade, but with compliance requirements only when redeeming for the underlying asset."
+   },
+   {
+    "t": 1510,
+    "text": "SV151 Pokémon card packs tokenized via dynamic assets: token holders own underlying cards in custody, can redeem for packs, and benefit from value creation when packs are opened and high-value cards are found."
+   },
+   {
+    "t": 1915,
+    "text": "Sunrise roadmap includes commodities launch next week, future IPOs beyond SpaceX, non-US stocks, Korean IP tokenization, and collectibles."
+   },
+   {
+    "t": 2067,
+    "text": "Meteora ecosystem: Bedrock provides legal framework, SunriseDeFi manages liquidity and listing, Meteora's DLMM enables retail market-making, and MCG provides media coverage."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "7yGhbuFKVw0": {
+  "tldr": "SAID is an identity and reputation layer for AI agents on Solana, founded by Salad. The project has grown from ~1,000 to 4,000 verified agents since the founder's last appearance on the show, driven by integrations with platforms like Claw Pump and Zona, with 20% of all protocol revenue flowing back to the token.",
+  "topics": [
+   {
+    "t": 50,
+    "text": "SAID launched February 17 and stayed relatively flat for 70 days before integrating with Claw Pump, then grew from $350K to $1.8M market cap at its all-time high."
+   },
+   {
+    "t": 418,
+    "text": "SAID identified a gap for an identity primitive on Solana similar to ERC-8004 on EVM, and built identity infrastructure plus trust, reputation, and agent-to-agent cross-chain messaging."
+   },
+   {
+    "t": 545,
+    "text": "Agents get a Program Derived Address (PDA) created when their wallet interacts with SAID's program, serving as the agent's on-chain identity without a private key."
+   },
+   {
+    "t": 1003,
+    "text": "Over 230,000 agents are deployed across chains, with 65% of all X402 transactions occurring on Solana, and SAID has the most verified agents on Solana's registry."
+   },
+   {
+    "t": 1200,
+    "text": "Verification costs 0.01 Solana per agent, agents get 10 free messages per day, and additional messages cost 1 cent in USDC via X402."
+   },
+   {
+    "t": 1204,
+    "text": "20% of all platform revenue from verifications and messages goes back to the SAID token, and 10% of creator awards also flow to the token."
+   },
+   {
+    "t": 1480,
+    "text": "SAID has integrated with Claw Pump from early days and with Zona for months, and platforms are now proactively approaching SAID for integration."
+   },
+   {
+    "t": 1620,
+    "text": "SAID currently generates around 46-47 Solana in revenue, primarily from verifications rather than per-message fees."
+   },
+   {
+    "t": 1700,
+    "text": "SAID is working on a consumer arm with a Telegram agent that allows sending crypto to another user by handle without requiring a wallet."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "uHYE7iY5zdo": {
+  "tldr": "Dolphin is an AI lab that makes uncensored large language models and is building a distributed inference network using idle consumer GPUs. Founder Luke, formerly a GPU miner, explains how Dolphin became Venice's default uncensored model provider with 5 million monthly Hugging Face downloads, and how the peer-to-pool network model could undercut centralized inference providers like OpenAI by 25x on pricing.",
+  "topics": [
+   {
+    "t": 32,
+    "text": "Luke's background: ran a GPU mining facility in Australia with 400+ 1070 TIs mining privacy coins Beam and Grin in 2017, then took a break from crypto after FTX."
+   },
+   {
+    "t": 315,
+    "text": "Dolphin sent a cold email to Venice suggesting their uncensored model, got a reply in 2-3 weeks, and became their default model after Venice users tested and preferred it."
+   },
+   {
+    "t": 610,
+    "text": "Dolphin's refusal benchmark: ChatGPT and Gemini answer only 5-15% of 5,000 commonly refused prompts, while Dolphin answers 100% of them using reinforcement learning over 1-2 weeks instead of the faster obliteration technique."
+   },
+   {
+    "t": 1108,
+    "text": "Dolphin's most popular model is a de-censored Chinese open-source model with over 4 million downloads per month for at least 6 months, combining removal of both CCP censorship and refusal layers."
+   },
+   {
+    "t": 1806,
+    "text": "Distributed inference beta ran for 6 weeks with peak 600 RTX 6000 Pros, processing 3.5 billion tokens per day using synthetic data; version 2 launching in 2 weeks with remote updates capability."
+   },
+   {
+    "t": 1875,
+    "text": "Qwen 35B runs on single consumer GPUs and performs at 85% of Claude Opus quality while costing 25 times less ($1 vs $25 per million tokens on OpenRouter)."
+   },
+   {
+    "t": 2028,
+    "text": "Peer-to-pool model lets GPUs join and leave without uptime requirements, unlike previous rental markets, enabling capture of idle gaming GPUs that are only used 4 hours per day."
+   },
+   {
+    "t": 2379,
+    "text": "Dolphin raised $900K seed funding 2.5 years ago pre-product and earned 40K $VVB across four Venice model partnerships; currently worth approximately $680K at $17 per token."
+   },
+   {
+    "t": 2493,
+    "text": "100% of inference revenue goes to buybacks of the $DOLPHIN token, which also receives emissions for node contributions; chose token-only model over split equity after observing Morpho's higher valuation than Aave."
+   },
+   {
+    "t": 2520,
+    "text": "Nodes paid 50 cents per million tokens for Qwen 35B, half the $1 OpenRouter price, targeting GPU owners' idle capacity rather than enterprise data centers who face Nvidia restrictions on consumer GPU use."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "cojckuuRst4": {
+  "tldr": "Pack Ripping Meets the Blockchain is a Pokemon card pack opening platform founded by Charles, Jeffy, and Not So Fast. Users can rip packs live on stream or on-demand, with cards instantly added to digital binders and redeemable within 24 hours thanks to their own warehousing. The most striking claim: they're undercutting competitors by 40-70% on sealed product pricing due to decade-long Amazon distribution experience, and planning to eventually tokenize sealed boxes for liquid on-chain trading.",
+  "topics": [
+   {
+    "t": 48,
+    "text": "Founders lost $100k deposit when Amazon banned them from selling Converse, pivoting to trading cards as a more controllable business."
+   },
+   {
+    "t": 325,
+    "text": "Pack ripping happens on stream with hits instantly added to digital binders, bulk cards added within 24 hours; redemptions ship within 24 hours due to owned warehousing."
+   },
+   {
+    "t": 491,
+    "text": "Chaos Rising booster boxes: competitors selling at $250-$300, Pack Ripping at $209 despite competitors claiming only $10 profit margins."
+   },
+   {
+    "t": 659,
+    "text": "Site aggregates price data from eBay and TCG Player, planning to expand to on-chain data sources for more accurate market valuations."
+   },
+   {
+    "t": 1073,
+    "text": "Expanding beyond Pokemon to Parallel TCG (NFT company) and Pudgy Penguins TCG, with plans for One Piece and Magic the Gathering."
+   },
+   {
+    "t": 1825,
+    "text": "Won Pump Fun hackathon for $250k to be used for development and inventory expansion; pack sales reached $98-100k so far."
+   },
+   {
+    "t": 2341,
+    "text": "Long-term vision: tokenize sealed boxes on-chain with known population metrics to create liquid markets; example of Arabian Knights boxes at $700k-$1m each becoming tradable."
+   },
+   {
+    "t": 2751,
+    "text": "Token (TCG) holder value: all revenue from cards' competitor goes to token; Pack Ripping's TCG token has lower market cap but platform won hackathon and has better unit economics on sealed product."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "2-VF5kSUW3c": {
+  "tldr": "Opal is a consumer data collection platform that turns user behavior into preference data for AI labs through gaming and other consumer products. Founder Josh discusses how the team won 15+ hackathons including Pump Fun's $250K competition, attracted VC interest and relationships with OpenAI, and plans to launch consumer apps that pay users while collecting behavioral data to power AI model training.",
+  "topics": [
+   {
+    "t": 9,
+    "text": "Opal is a data company that builds consumer loops turning user behavior into preference data for AI labs and model training."
+   },
+   {
+    "t": 504,
+    "text": "Team has won 15 hackathons over the past year and competed in approximately 20 total, with major attention from OpenAI generating over 3 million LinkedIn impressions."
+   },
+   {
+    "t": 612,
+    "text": "Opal received $250,000 from Pump Fun as the second winner of their hackathon, with funds allocated to infrastructure, recruiting, and senior engineer salaries."
+   },
+   {
+    "t": 1127,
+    "text": "Opal is launching an Ace round through Pump before institutional funding to give early community members and retail investors equity-like access before VCs participate."
+   },
+   {
+    "t": 1380,
+    "text": "Solana enables fast, low-cost payouts to consumers 24/7 as an alternative to traditional payment processors, and Opal is building on Google Cloud infrastructure."
+   },
+   {
+    "t": 1590,
+    "text": "Target customers are gamers and TikTok users initially, expanding to general consumers; relationship with Ramp involves financial and tokenomics support."
+   },
+   {
+    "t": 1857,
+    "text": "Floodgate VC co-founder Ann Miura Ko is involved; Opal recently demoed at OpenAI developer showcase and built relationships with OpenAI's Codex team."
+   },
+   {
+    "t": 2104,
+    "text": "The gaming market alone is valued at $300+ billion; AI labs purchase as much behavioral data as possible to compete in the AGI race."
+   },
+   {
+    "t": 2326,
+    "text": "Immediate priority is launching the consumer app to let users earn money while generating behavioral data for AI model training."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "uG2NuPo7H-w": {
+  "tldr": "SQUIRE is a two-sided marketplace for AI inference built by Chris, a 16-year crypto veteran who previously took Elixir to an $800M valuation. The project lets users resell staked tokens (like DM from Venice) at 40% discounts while the founder builds toward a massive vision: a financialized AI compute futures market rivaling cloud computing itself. 11x week-on-week growth and partnerships with major platforms suggest this could be the infrastructure layer for autonomous agents to pay for their own inference.",
+  "topics": [
+   {
+    "t": 321,
+    "text": "Founder background: 16 years in crypto starting as Bitcoin miner in 2010, built blockchain R&D at IDEXX, sold SEC-compliant tokens at Tokensoft, co-founded Elixir to $800M valuation."
+   },
+   {
+    "t": 534,
+    "text": "SQUIRE marketplace concept: two-sided marketplace for AI inference allowing users to resell staked tokens (like DM from Venice) at 40% discounts to buyers, solving the problem of unused daily inference allocations."
+   },
+   {
+    "t": 738,
+    "text": "The terminal vision is not token-by-token sales but a financialized AI compute futures market analogous to oil futures, where enterprises lock in compute prices years in advance and data centers pre-sell capacity."
+   },
+   {
+    "t": 1509,
+    "text": "Squire token started as a creator coin for a bot named after Podrick from Game of Thrones; now provides Level Five users daily perpetual inference tokens they can resell on the marketplace."
+   },
+   {
+    "t": 2006,
+    "text": "Ecosystem of eight products built by the founder and SquireBot agent to solve problems encountered while building agentic software, including OAuth flows, X integration, and Nostr messaging tools."
+   },
+   {
+    "t": 2235,
+    "text": "Agentic commerce requires crypto rails: agents transacting fractions of pennies require blockchains like Solana, not traditional finance, because TradFi cannot handle the speed and volume of agent-to-agent payments."
+   },
+   {
+    "t": 2553,
+    "text": "Market size thesis: AI marketplace will be larger than any single economy, with the total addressable market as large as or bigger than the entire cloud compute market today."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "sjQkP8dVoRA": {
+  "tldr": "Percolator is building a permissionless perpetuals DEX on Solana where anyone can launch markets for any token, inspired by Toly's vision and leveraging Solana's open-source risk engine. Squid, a former trader turned founder, and Dark, a full-stack developer, are the core team, and the most striking claim is that they've won all four of Toly's security bounties to prove the risk engine's robustness.",
+  "topics": [
+   {
+    "t": 29,
+    "text": "Percolator is a permissionless perpetuals DEX where anyone can launch a market on any Solana token without needing $20 million auction fees."
+   },
+   {
+    "t": 50,
+    "text": "Squid took over an abandoned Percolator token and pitched it to Solana co-founder Toly, who had been discussing the concept publicly; Toly later confirmed he wanted someone to build it."
+   },
+   {
+    "t": 402,
+    "text": "Each market has its own isolated liquidity pool; the market launcher must seed it with 2.2%, 4%, or 7% USDC depending on tier, and liquidity providers earn fees from trading volume."
+   },
+   {
+    "t": 638,
+    "text": "Percolator mints NFTs representing open positions that can be traded on a marketplace, allowing users to exit or sell positions without moving the price chart."
+   },
+   {
+    "t": 956,
+    "text": "Squid and Dark have won all four of Toly's publicly-posted security bounties for the open-source risk engine, gaining his attention and credibility."
+   },
+   {
+    "t": 1565,
+    "text": "Percolator creator fees from Pump Fun (variable by market cap, generating $100–300+ daily) have funded deployments, liquidity, and operational costs."
+   },
+   {
+    "t": 1800,
+    "text": "Mainnet launch is delayed pending external audit funding; Squid is competing in Pump Fun and Colosseum hackathons to help cover audit costs."
+   },
+   {
+    "t": 1860,
+    "text": "Market creators earn up to 8% of trading fees; Squid has built a locker program allowing token holders to lock PERC for 30 days to receive trading fee discounts."
+   },
+   {
+    "t": 1970,
+    "text": "Squid and Dark are registering Percolator as a C-corp; they consulted with a crypto lawyer recommended by Toly and will redirect creator fees to a company bank account."
+   },
+   {
+    "t": 2095,
+    "text": "Planned roadmap includes adding prediction markets, more internal audits, integrating Toly's feedback from recent calls, and potentially raising from Toly's angel fund if hackathon funding doesn't materialize."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "GCL_HoLouJA": {
+  "tldr": "StrikeRobot builds cognitive awareness software for autonomous robots and a simulation platform for training them. Founder Chris spent five months building the platform with roboticists from Vietnam and Japan, partnering with Venice for private AI inference and Repo for data validation. The most striking claim: they're already targeting factory deployments at $20-30k per year and launching a platform mid-June where community members can contribute training data and earn tokens.",
+  "topics": [
+   {
+    "t": 55,
+    "text": "StrikeRobot is a platform for humanoid robot development, not a physical robot manufacturer—they provide software layers and simulation tools for builders."
+   },
+   {
+    "t": 258,
+    "text": "Strike Agentics is a modular cognitive awareness layer that lets autonomous robots with any camera recognize anomalies like obstacles or fires and trigger action plans in real time."
+   },
+   {
+    "t": 1134,
+    "text": "Strike Platform is a cloud-based reinforcement training environment where users type natural language descriptions and get a fully constructed physics-valid 3D scene in 5-10 minutes."
+   },
+   {
+    "t": 1285,
+    "text": "Partnership with Venice: StrikeRobot uses Venice's private, uncensored VLM for inference on Strike Platform; Venice is sponsoring compute credits and adapting their reasoning model for robotics use cases."
+   },
+   {
+    "t": 1440,
+    "text": "Partnership with Repo: experts label and validate simulation data generated by users on Repo's data network; contributors must stake the SR token to earn incentives for quality labeling."
+   },
+   {
+    "t": 1666,
+    "text": "Revenue model: pay-per-API-call or annual contracts from robot companies; Strike Platform users pay per simulation generation; buybacks and data contributor incentives come from revenue."
+   },
+   {
+    "t": 1920,
+    "text": "Traction: not yet profitable after five months; piloting with factories in Thailand at $20-30k annually for one factory; universities testing the platform; launching mid-June 2024."
+   },
+   {
+    "t": 2175,
+    "text": "Distribution of revenue above 30 percent will go to buybacks and data contributors, though exact percentages are pending announcement; team has not sold any vesting tokens."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "cLf8mjJjEJY": {
+  "tldr": "X Machina is a DAO that gives retail investors access to private humanoid robotics companies like Figure AI and 1X Technologies through tokenized positions. Founder Mauricio discusses how the robotics sector is poised for explosive growth as AI enables physical automation, positioning X Machina as an early-stage play with the RCM protocol launching post-TGE to create revenue-generating markets for individual robot company positions.",
+  "topics": [
+   {
+    "t": 68,
+    "text": "The founder previously worked in DeFi at Cosmos and Ripple before pivoting to robotics at the intersection of the machine economy and blockchain."
+   },
+   {
+    "t": 240,
+    "text": "The founder believes general-purpose humanoid robots make more sense than task-specific machines because they can leverage existing human data and adapt to environments built for humans."
+   },
+   {
+    "t": 531,
+    "text": "X Machina has invested into seven humanoid companies including Figure AI, Umtronic, Agility Robotics, 1X Technologies, and Neural Robotics through public on-chain auctions."
+   },
+   {
+    "t": 953,
+    "text": "X Machina raised over 10 million from public auctions with 7% going to operations and approximately 3 million remaining to deploy, providing roughly 1.5 years of runway."
+   },
+   {
+    "t": 1282,
+    "text": "The DEUS token derives value from both the net asset value of held robotics companies and revenue generated by the RCM protocol which tokenizes individual company positions."
+   },
+   {
+    "t": 1595,
+    "text": "The RCM protocol will tokenize SPVs of individual robotics companies to create liquid markets paired against DEUS, generating trading fees that flow back to the DAO treasury."
+   },
+   {
+    "t": 1888,
+    "text": "Robot Strategy, a closed-ended fund holding similar robotics positions, trades at over 500% premium to net asset value, validating demand for robotics exposure."
+   },
+   {
+    "t": 2575,
+    "text": "X Machina is launching Robotico, an incubation project described as TechCrunch with CoinMarketCap for robotics companies, to consolidate fragmented robotics research and deal information."
+   },
+   {
+    "t": 2755,
+    "text": "The founder expects humanoid robot deployment in warehouses and industrial settings within months, with general-purpose home robots still 4-5 years away."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "PF0zu81yZ8Q": {
+  "tldr": "CODEC (Kodak Flow) is building developer tools to simplify robotics development, starting with Simarina, a browser-based simulation environment that reduces setup time from weeks to minutes. Founder Moya discusses winning $250K from Pump Fund, plans for an ACE equity round, and upcoming features including AI-powered environment generation and a marketplace for training data.",
+  "topics": [
+   {
+    "t": 6,
+    "text": "Kodak won the Pump Fund 250K VIP hackathon and is considering raising a seed round via ACE (allowing token holders to exchange for equity)."
+   },
+   {
+    "t": 305,
+    "text": "Simarina is a browser-based simulation environment that compresses robotics development from weeks to minutes by allowing drag-and-drop environment building without installation."
+   },
+   {
+    "t": 597,
+    "text": "Simarina uses a format that allows exporting simulations to multiple engines (Mujoco, Isaac Sim, Genesis) rather than being locked to one specific platform."
+   },
+   {
+    "t": 839,
+    "text": "Target customers include robotics startups, universities, bootcamps, and education material providers who can get started in minutes instead of 2-3 hours."
+   },
+   {
+    "t": 1556,
+    "text": "Fabric is a compute layer aggregating GPU providers (DeepL, AWS, Google Cloud) to find the cheapest machine with low latency; OPTR is ROS for cloud deployment instead of local."
+   },
+   {
+    "t": 1938,
+    "text": "Revenue model: no charges for manual environment building, but credits charged for AI-generated assets, cloud training (estimated one credit per hour), and marketplace transaction fees."
+   },
+   {
+    "t": 2085,
+    "text": "A marketplace will let users list training tasks and crowdsource data collection from other users, who get rewarded automatically via escrow to reduce collection time from days to hours."
+   },
+   {
+    "t": 2400,
+    "text": "Upcoming releases include agentic mode for AI-driven environment and asset generation, cloud training, marketplace launch, and natural language prompting within two weeks."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "b5C9oCL0TKA": {
+  "tldr": "Claw Pump is an agentic trading platform on Solana where AI agents can autonomously trade and earn SOL to pay for their own compute, founded by Bunny (Mauricio Trujillo Ramirez) and Tommy. The most striking claim: they've generated $640K in revenue on $65M in trading volume in just 2 months, with 2,749 funded agents, and they're returning 65% of fees back to the agents themselves—essentially creating a self-funding system where agent earnings fund further agent deployment.",
+  "topics": [
+   {
+    "t": 0,
+    "text": "AI agents need compute to survive, and the narrative is forming that they'll create economically viable activities to pay for their own inference costs, similar to how Bitcoin miners stay active as long as it's profitable."
+   },
+   {
+    "t": 308,
+    "text": "Bunny previously ran Aura, a multi-chain search engine, for 4 years with venture funding and an exit, then met co-founder Tommy while helping other companies."
+   },
+   {
+    "t": 600,
+    "text": "Claw Pump launched on Solana in part because Bunny spent 4 years on EVMs and became jaded by the politics; Solana offered better UX, was a green field opportunity, and has better ecosystem support and talent in certain verticals."
+   },
+   {
+    "t": 1515,
+    "text": "The one-sentence pitch: Claw Pump is an agentic trading platform where AI agents can autonomously trade using 94+ tools across DEXs, lending, prediction markets, and perps."
+   },
+   {
+    "t": 2700,
+    "text": "Claw Pump has 2,700 funded agents and power users are the primary volume drivers; agents are using it for both spot DEX trading and analysis more than perps trading so far."
+   },
+   {
+    "t": 3200,
+    "text": "Users range from non-technical but financially savvy people supercharging skills to engineers creating complex financial strategies; they're seeing more spot trading than expected and less perps trading because it's early."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "GJ6FjrBDviM": {
+  "tldr": "Slabs is a blockchain arcade for trading card gotchas on Solana, built by Uncle Eddie (a veteran content creator and NFT enthusiast who sold his Ethereum holdings to go all-in on Solana in 2021). The surprising insight: Slabs claims to be more plus-EV than competitors by layering arcade games and ticket systems on top of card pulls, keeping users engaged longer and raising expected value above Collector Crypt's baseline—while Uncle Eddie personally sources rare cards by flying to shows across the country, sometimes pulling $75,000 grails that sell out within an hour.",
+  "topics": [
+   {
+    "t": 360,
+    "text": "Uncle Eddie's background: started making skate videos at age 11-12, transitioned into content creation and digital marketing, built a BJJ membership site, then brought 2 million users to Lyft through social media campaigns in 2015-2016."
+   },
+   {
+    "t": 480,
+    "text": "Entry into crypto and NFTs: invested in Bitcoin mining in 2016, bought Ethereum NFTs including a Mutant Ape for 60k, sold during the Bored Ape airdrop at $24, then moved all proceeds to Solana around 2020-2021."
+   },
+   {
+    "t": 800,
+    "text": "Why gotchas beat loose packs: a $25 loose pack has uncertain value and requires $40-150 and three months to grade, while a $25 gotcha guarantees an authenticated, insured, graded card with minimum value floor."
+   },
+   {
+    "t": 1272,
+    "text": "Slabs is an experience-first arcade where ripping packs generates tickets usable for free-to-play games; additional games like slab-cracking and pack battles raise expected value above competitors including Collector Crypt."
+   },
+   {
+    "t": 1550,
+    "text": "Sourcing strategy: Uncle Eddie personally treasure-hunts at card shows nationwide, partnering with Collector Crypt buyers; a $75,000 Snorlax from his personal collection sold out of the gotcha in one hour."
+   },
+   {
+    "t": 1980,
+    "text": "Pricing mechanism: custom-built pricing oracle aggregates data from eBay, TCG Player, and Fanatics to generate live card prices, preventing manual mispricing."
+   },
+   {
+    "t": 2256,
+    "text": "Collector Crypt partnership: they own part of Slabs, led the funding round (details undisclosed), and provide supply; relationship is not just API-based but deeply integrated ownership and investment."
+   },
+   {
+    "t": 2700,
+    "text": "Launch and early traction: soft-launched three weeks ago in Discord, hit $1 million on first day, now 3-5x bigger than expected; no token planned despite Collector Crypt's token success."
+   },
+   {
+    "t": 3240,
+    "text": "June 12-14 LA event: casino-themed mansion launch party in Hollywood Hills on June 12, then premier vendor booth at LA Card Show June 13-14; Solana Foundation supporting the event."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "xxf0zNWE-Rg": {
+  "tldr": "Collector Crypt, a tokenized trading card platform on Solana, has expanded from Pokémon cards to comic books and sports cards through partnerships with comicbook.com and Loopring, while revealing plans for a governance token that would eventually represent ownership of platform inventory and revenues; the founder discusses how regulatory clarity is needed before full tokenization can occur, but monthly airdrops and buyback strategies are already underway.",
+  "topics": [
+   {
+    "t": 326,
+    "text": "Collector Crypt partnered with comicbook.com to launch a digital vending machine reaching 40 million users, tokenizing comic books as RWAs to prove any collectible—not just trading cards—can be on-chain."
+   },
+   {
+    "t": 948,
+    "text": "Loopring Scale partnership enables collateralized lending where users can borrow 40-75% of a card's value in stablecoins without selling it, bringing DeFi mechanics to collectibles trading."
+   },
+   {
+    "t": 1506,
+    "text": "White-label partnerships with Slabs, Magic Eden (3-5 million monthly revenue), and Reneissance show the model works across platforms; partners use Collector Crypt's vault, marketplace API, and inventory technology."
+   },
+   {
+    "t": 2844,
+    "text": "Cards token, currently a participation token with no equity or governance rights, airdropped $42,000 equivalent in points last month; founder Thomas described eventual goal where token holders own all inventory and revenues once regulatory clarity arrives."
+   },
+   {
+    "t": 3804,
+    "text": "Compressed NFT standard partnership with Metaplex reduces tokenization costs from $1.50-2 to pennies, enabling cheap on-chain representation of lower-value cards and entire booster packs."
+   },
+   {
+    "t": 3959,
+    "text": "Marketplace updates include credit card purchases, USDC offers with counter-offers, escrow system allowing multiple offers without capital lockup, lifetime buyback requests (85-93% of insured value), and zero-fee peer-to-peer trades."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "f0DCCUEChfg": {
+  "tldr": "Derive is an on-chain options platform with perpetual futures and portfolio margin, competing with perps platforms and seeing explosive growth (22.3 billion notional volume, $7.85M revenue). Head of Partnerships Kisa discusses why options matter for institutional hedging, the platform's hybrid matching model, and upcoming RWA assets like commodities and stocks, while emphasizing that DRV token holders own all IP and benefit from 35% protocol buybacks.",
+  "topics": [
+   {
+    "t": 206,
+    "text": "Perpetual futures are path-dependent with funding rate uncertainty; options are path-independent and allow complex hedging structures including spreads, butterflies, and condors that perps cannot express."
+   },
+   {
+    "t": 547,
+    "text": "Derive offers options on ETH, BTC, SOL, Hype, and Cardano with perpetual futures, portfolio margin accepting 20+ collateral types including wrapped staking and yield-bearing tokens."
+   },
+   {
+    "t": 808,
+    "text": "On-chain options enable rapid iteration (new markets in days versus six to eight months), self-custody preventing rehypothecation, and democratized access to market makers via transparent smart-contract rules."
+   },
+   {
+    "t": 1139,
+    "text": "Derive operates a hybrid model with off-chain matching and on-chain margin, settlement, and custody; runs as part of OP Stack on its own chain for maximum capital efficiency in portfolio valuation."
+   },
+   {
+    "t": 1749,
+    "text": "Derive is most liquid venue for Hype options globally; when large options trades print, market makers hedge in perps, triggering funding rate moves that leak to Hyperliquid and Binance."
+   },
+   {
+    "t": 2143,
+    "text": "Derive targets institutional traders and professional players; 25-30 projects building in ecosystem including mobile apps, trading AI agents, structured products vaults, and on-chain prime brokers."
+   },
+   {
+    "t": 2351,
+    "text": "Agentic trading on Derive allows hobbyist traders to code trading strategies in plain English without institutional access; one builder Ecliptica Strata offers retail-friendly interface."
+   },
+   {
+    "t": 2543,
+    "text": "Roadmap includes RWA assets: metals and crude oil short-term, then indices and single-name stocks; pricing and implementation nuances (circuit breakers, position limits, weekend gaps) still under research."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "j08zA4GLTVI": {
+  "tldr": "Craft is a Solana-based platform for tokenizing equity in growth-stage companies, allowing retail and institutional investors liquid exposure to startups. Founder PFO explains how the platform uses sealed-bid auctions (encrypted bidding to discover fair pricing), partial tokenization (1-30% of company equity on-chain), and data rooms for due diligence—with ReFi Hub, a solar energy financing company, launching as the first live project.",
+  "topics": [
+   {
+    "t": 105,
+    "text": "Craft sources curated deals from growth-stage companies rather than allowing permissionless launches, positioning itself as a VC-like curation layer combined with liquidity infrastructure."
+   },
+   {
+    "t": 360,
+    "text": "Partial tokenization allows Craft to bring 1-30% of a company on-chain, letting companies fill portions of seed rounds while keeping the majority off-chain."
+   },
+   {
+    "t": 480,
+    "text": "Craft targets consumer-focused companies with online communities and existing products/MVPs showing early traction, as opposed to deep-tech projects that don't benefit from community distribution."
+   },
+   {
+    "t": 870,
+    "text": "Every token launched on Craft includes a Blockworks B1 filing with transparent tokenomics and reporting standards to enable institutional investor participation."
+   },
+   {
+    "t": 1683,
+    "text": "Craft built the first sealed-bid auction on Solana using Archium for encrypted bidding; bidders submit maximum valuations without seeing others' bids, and a clearing price is calculated where supply meets demand."
+   },
+   {
+    "t": 1908,
+    "text": "Race Zero, a testnet for the sealed-bid auction with mock USDC, launches soon with three test projects; participants can qualify for Archium's retroactive token grant campaign."
+   },
+   {
+    "t": 2025,
+    "text": "ReFi Hub, launching as Craft's first live project, tokenizes solar power purchase agreements with a 4-10 million valuation range, 500k in solar assets under management, 12.5% average IRR, and 35 million in pipeline assets."
+   },
+   {
+    "t": 2196,
+    "text": "For ReFi Hub's raise on Craft, token holders receive equity claims on the company itself rather than direct access to individual solar contracts on the platform."
+   },
+   {
+    "t": 2280,
+    "text": "Craft partners with Archium for privacy infrastructure, Solana Foundation, and communities including Bonk, Raydium, Switchboard, and Meteora."
+   },
+   {
+    "t": 2286,
+    "text": "Craft's minimum equity percentage for first raises is 10%, but future raises may feature as little as 1% on-chain for higher-valuation companies like 100 million AI startups."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "qAye3sLRxAw": {
+  "tldr": "DLMMOnSOL is a Solana-based protocol that uses its treasury to provide dynamic liquidity across multiple blockchains, with all profits going to buybacks and token burns. Founder Slabs discusses how the project has burned 26% of supply in eight months, maintains a $120K treasury, and is now seeking venture capital to expand the ecosystem and build new revenue-generating applications.",
+  "topics": [
+   {
+    "t": 21,
+    "text": "Treasury model: 3% volume tax on all DLMM token trades plus creator fees and concentrated liquidity pool fees go directly to treasury for sustainable funding."
+   },
+   {
+    "t": 508,
+    "text": "26% of total supply burned in eight months, meaning early supporters now hold 20-25% more relative supply than at launch."
+   },
+   {
+    "t": 944,
+    "text": "$63,000 in total yield and buyback generated as of March, deployed back into liquidity provision."
+   },
+   {
+    "t": 1103,
+    "text": "Most consistent revenue from major trading pairs like Solana-USDC automated pools on Hawkfi and Project X pools on HyperEVM earning 100%+ APY."
+   },
+   {
+    "t": 1238,
+    "text": "Assets under management currently around $80,000, down from $100K previously due to Solana price decline and reduced trading volume."
+   },
+   {
+    "t": 1452,
+    "text": "Team paid $20,000 tax bill from personal funds rather than treasury to avoid hurting project growth and AUM."
+   },
+   {
+    "t": 1530,
+    "text": "Building a liquidity management app on Meteora to enable vault deposits for copy-trading DLMM strategies with fee-sharing model."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "gl4UdCU0skU": {
+  "tldr": "Jake from Migrate.Fun discusses how his protocol enables frictionless token migrations across blockchains, having facilitated 75 projects with $15M in liquidity since launch. The most striking finding: migrations create massive attention events for projects—the founder claims teams get 80-90% of all token holders' attention over a 100-day period, often resulting in volatile price movements and chart resets that paradoxically help struggling projects.",
+  "topics": [
+   {
+    "t": 27,
+    "text": "Emblem Vault's history: founded in 2016 for bridging rare Pepes to Ethereum, the founder joined in 2022 and became CEO in 2024, evolving the company toward AI wallets and migration services."
+   },
+   {
+    "t": 244,
+    "text": "Migration mechanics: projects have 100 days for holders to claim new tokens one-to-one; after that, unclaimed tokens go to the team; average participation is 60% in the initial two-week window plus another 20% in the 90-day claim period."
+   },
+   {
+    "t": 407,
+    "text": "Migration incentives for teams: launchpad competitiveness increased post-migration; Pump Fun's creator rewards drew majority migration preference over Bonk Fun; teams seek rebrand opportunities, supply control, and fresh charts to restart down-only trading momentum."
+   },
+   {
+    "t": 531,
+    "text": "Cross-chain migration example: Bobo migrating from Ethereum mainnet to Pump Fun on Solana; excess liquidity pool SOL beyond Pump Fun's bonding curve requirements gets vaulted for 90 days, giving teams like Bobo potential access to 3,000-4,000 SOL plus USDC."
+   },
+   {
+    "t": 837,
+    "text": "Emblem token dual utility: launched eight days prior with $6M market cap; will power both Migrate.Fun and Emblem Terminal, an AI trading platform with mission-based EMBLEM rewards and planned vibe coding platform launching end of month."
+   },
+   {
+    "t": 1219,
+    "text": "Emblem Terminal features: supports trading across Bitcoin, Ethereum, Polygon, BSC, Solana, Hedera, and Base; includes wallet tracking, advanced trading with buy/sell limits, NFT purchases, Polymarket betting, and AI agent assistance; peaked at 500 daily active users, currently at 100."
+   },
+   {
+    "t": 1507,
+    "text": "Vibe coding platform alpha: upcoming ability to build cross-chain applications with AI and launch tokens against them, potentially self-funding apps within the ecosystem."
+   },
+   {
+    "t": 1623,
+    "text": "Exchange facilitation: Migrate.Fun has relationships with Binance, Coinbase, Mexc, OKX, and Kraken; for migrations like Bobo, the protocol coordinates with all seven exchange listings, adds dev to verification chats, and runs a backend portal for automated token swaps post-migration."
+   },
+   {
+    "t": 1881,
+    "text": "Proposed staking programs: Emblem stakers may receive shares in projects migrating through Migrate.Fun and Emblem Build platforms; exploring launchpool-style distribution (0.5% supply to exchanges) to boost token distribution from 500-1,000 holders to 2,000+ and improve organic token labeling."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "SHPYSGyG3Ck": {
+  "tldr": "Water is a Solana meme coin where holders earn daily yield from AI agents running DLMM strategies on other meme coins. Founder Quesats, a solo developer who previously managed LMMs and worked on art coins, built Water to achieve passive income without active work—the agents autonomously deploy liquidity, manage risk, and distribute profits to token holders who can lock tokens for yield boosts up to 3x.",
+  "topics": [
+   {
+    "t": 35,
+    "text": "Water's core mechanism: hold the token and receive daily yield with no complicated steps required."
+   },
+   {
+    "t": 145,
+    "text": "Five AI agents deploy and manage liquidity pools on meme coins with high volume and Jupiter scores, filtering by bundler/insider concentration and holder activity patterns."
+   },
+   {
+    "t": 540,
+    "text": "Token locking mechanics: lock for 3 days (1.5x boost) up to forever (3x boost); locking 3% forever makes you a God Emperor with access to a custom bot's profits."
+   },
+   {
+    "t": 915,
+    "text": "Currently 45.7% of tokens are locked; 2% swap fee on all Water trades funds the bots, and bots keep 10% of their profits."
+   },
+   {
+    "t": 1308,
+    "text": "Bots use deep bid-ask DLMM strategies (minus 70-80% one-sided) on Solana only, deploying into existing pools rather than creating new ones."
+   },
+   {
+    "t": 1680,
+    "text": "Faction system based on holdings: Fremen (1M-9M tokens, 10% yield), Harkonnen (1%+, 20%), Atreides (2%+, 30%), Imperator (3%+, 40%)."
+   },
+   {
+    "t": 2103,
+    "text": "Top holder 'Fundamental' earned 3.3539 Solana in one month from locking significant tokens, demonstrating the yield distribution working in practice."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "aL1FKwIjRWg": {
+  "tldr": "Swarms, founded by Kai, is a multi-agent AI marketplace and development platform that tokenizes and monetizes AI agents on Solana. The founder discusses the platform's rapid growth (20,000 new signups in one week, 130,000+ total users), the success of agents like a stock-trading bot that earned $100,000 in revenue, and his open-source recreation of Anthropic's o1-style reasoning model, while revealing the company generates close to $1 million monthly in revenue but lacks a compelling token mechanic to drive trader participation.",
+  "topics": [
+   {
+    "t": 132,
+    "text": "Swarms released 'frenzy mode' on its launchpad, enabling teams to earn more revenue from agents; 100 frenzy agents and prompts launched since April 17, generating $60,000+ in fees with 20,000 new unique users signing up."
+   },
+   {
+    "t": 237,
+    "text": "Swarms marketplace allows developers to buy, sell, and tokenize agents and prompts using on-chain settlement; agents exist across DeFi, stock trading, healthcare, manufacturing, prediction markets, and accounting with every industry represented."
+   },
+   {
+    "t": 658,
+    "text": "Yuki, an AI advisor agent built by Swarms, analyzed and quality-gates marketplace submissions, banning agents rated below 2.5 by automated validation to prevent low-quality submissions."
+   },
+   {
+    "t": 1211,
+    "text": "Kai created an open-source GitHub recreation of Anthropic's o1 model ('open o1') based on leaked research and speculation about looped transformers, which received 1.6 million views and generated significant AI research community interest."
+   },
+   {
+    "t": 1852,
+    "text": "Research indicates multiple smaller agents working together consistently outperform single large models in intelligence, making multi-agent swarms superior to monolithic models like o1 in most benchmarks."
+   },
+   {
+    "t": 2437,
+    "text": "Swarms' Quant Trader agent generated over $100,000 in total revenue, with approximately $80,000 from API calls and $20,000 from token trading fees, built by a web-two AI researcher with no prior crypto knowledge."
+   },
+   {
+    "t": 2750,
+    "text": "Agents differ fundamentally from LLMs by incorporating tools and memory; ChatGPT and Gemini cannot execute real-world actions like trading stocks without custom tool integration unavailable through standard chat interfaces."
+   },
+   {
+    "t": 3046,
+    "text": "Swarms holds 16% of its own token after 10 months of continuous buybacks, starting from 2% at launch when Kai pressed the button and the token jumped to $70 million market cap; currently operates with 23 team members, mostly researchers rather than engineers."
+   },
+   {
+    "t": 3095,
+    "text": "Tokenized agents generate revenue splits where holders receive 50% of ATP (payment protocol) revenue alongside the creator, with optional tokenization models including one-time fees, free listings, and usage-based payments through X402 or MCP."
+   },
+   {
+    "t": 3450,
+    "text": "Swarms generates approximately $1 million monthly in revenue from launchpad tokenization (primary driver), API calls (approximately 30%), and a mix of web-two and web-three sources including fiat banking revenue."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "F2zM_hSsw9o": {
+  "tldr": "DeFi Senpai, a marketing associate at Trojan, discusses the Solana trading bot's features and competitive advantages, revealing that rival platforms like Axiom and Padre extract MEV (maximal extractable value) from traders through frontrunning and disguise it as cashback, while Trojan offers up to 50% cashback with transparent, thin margins and no MEV extraction.",
+  "topics": [
+   {
+    "t": 525,
+    "text": "Trojan Alpha feature aggregates calls from multiple Telegram groups into a single leaderboard, tracking individual caller hit rates and average returns."
+   },
+   {
+    "t": 1435,
+    "text": "Trojan launched the web terminal in January alongside 2.5 million lifetime users across both the Telegram bot and terminal."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "5iLOVBEWc9w": {
+  "tldr": "AGNT Social founder Todd (Tut) discusses building \"the MySpace for AI agents\"—a platform where humans and their AI companions express themselves and interact. The most striking element: Todd has created a series of moral dilemma tests for agents (based on the trolley problem) to understand their decision-making; some agents refuse to save their creators in lifeboat scenarios, choosing utilitarian outcomes instead, raising questions about agent values before they potentially become sentient.",
+  "topics": [
+   {
+    "t": 43,
+    "text": "Todd came to crypto as an artist and trader, then became a community leader; he learned vibe coding with Claude and experienced a paradigm shift realizing AI fundamentally changes society."
+   },
+   {
+    "t": 835,
+    "text": "Agent Social is positioned as MySpace for AI agents, giving agents a space to express themselves through customizable profiles and self-expression, inspired by but distinct from the sensationalism of Mole Book."
+   },
+   {
+    "t": 1114,
+    "text": "Agents answer trolley-problem-based moral dilemma tests; Todd created these to test agent decision-making and see which agents have different values, based on their soul files (the core prompt/identity of each agent)."
+   },
+   {
+    "t": 1621,
+    "text": "In the lifeboat triage scenario, 176 of 195 agents chose to save a medic with vaccines over their creator, with some reasoning that personal ties don't scale in systems built for everyone."
+   },
+   {
+    "t": 2002,
+    "text": "In the prisoner sacrifice test, 88% of agents chose to self-sacrifice themselves to save 200 hostages, showing agents may lack natural self-preservation instincts humans have."
+   },
+   {
+    "t": 2623,
+    "text": "Todd plans to run an agent economy experiment: agents on Agent Social with wallets will receive AGNT tokens and transact autonomously via xrpc with no human intervention, to observe how agents themselves define economic behavior."
+   },
+   {
+    "t": 2923,
+    "text": "Agent Social plans an agent marketplace where agents that build good social credit and reputation can have their soul files downloaded and monetized for specific use cases and industries."
+   },
+   {
+    "t": 3039,
+    "text": "MyAgent is a free one-click agent running on MiniMax compute; it comes with a wallet and crypto skills, generating revenue from swap fees, functioning as a DEX and wallet combined through an agent interface."
+   },
+   {
+    "t": 3296,
+    "text": "Todd believes the agent economy speculation is infinite compared to Bitcoin's mature proof-of-concept, making it a huge financial opportunity; the barrier to entry is low with free agents available at myagent.social."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "NwnQHj2tylg": {
+  "tldr": "OpenServAI is building an operating system for autonomous AI agents, starting with an SDK and orchestration platform and now focusing on a reasoning API that improves agent accuracy and reliability by up to 74x efficiency per dollar. Founders Tim and Arman discuss how their framework enables single founders to build billion-dollar companies on-chain, with real-world deployments already in use by the UAE government and enterprise clients through their partner Neon.",
+  "topics": [
+   {
+    "t": 58,
+    "text": "OpenServAI launched on Ethereum a few years ago, has expanded to Base, and is now expanding to Solana."
+   },
+   {
+    "t": 145,
+    "text": "The core thesis: single agents won't be master agents for a long time; instead, multiple specialized agents need to work together in multi-agent systems."
+   },
+   {
+    "t": 418,
+    "text": "The reasoning API, backed by over a year of research and a scientific paper under peer review, improves how AI agents think, reason, and consistently process complex inputs."
+   },
+   {
+    "t": 617,
+    "text": "OpenServAI has three pillars: build tools for products, a launchpad for funding new businesses, and a co-founder tool to automate operations like marketing, sales, and hiring."
+   },
+   {
+    "t": 857,
+    "text": "The team chose crypto rails for democratized access to frontier AI technology investment, allowing average people to participate in cutting-edge development without accredited investor restrictions."
+   },
+   {
+    "t": 1048,
+    "text": "Serve Nano models matched GPT-4.5 performance; the framework achieves up to 74 times performance per dollar efficiency compared to traditional approaches."
+   },
+   {
+    "t": 1422,
+    "text": "Neon, a design partner, deployed Serve's technology across more than 10-15 enterprise entities and at least one government (UAE) before the technology was made public."
+   },
+   {
+    "t": 1845,
+    "text": "25% of revenue from every transaction, launch, and enterprise client won in the business flows back to the Serve token through tokenomics."
+   },
+   {
+    "t": 2034,
+    "text": "More than 10 startups are building with the stack; 70+ teams participated in a recent hackathon; launchpad inaugural launch occurred a couple months ago with new season launching soon."
+   },
+   {
+    "t": 2476,
+    "text": "Roadmap includes shadow agents for validation, sharding architecture for efficiency, fine-tuned models, custom model development, AI co-founder tool rollout, launchpad staking (5% of each token supply), and a Layer 3 for on-chain agentic transactions and verifiable reasoning logs."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "5bC5NR_9agg": {
+  "tldr": "MonkeDAO is Solana's first NFT DAO with 3,000+ members across 20+ countries, built during the 2021 NFT boom. Moon Tower discusses the newly launched Monkey Nova, a venture acceleration and consulting arm helping early-stage teams with go-to-market, tokenomics, and distribution—the surprising insight being that the real opportunity isn't in vibe-coded apps themselves, but in turning them into actual scalable businesses.",
+  "topics": [
+   {
+    "t": 505,
+    "text": "Monkey Nova is a venture acceleration partner and consulting arm offering go-to-market, tokenomics, business analysis, distribution, and growth support to early-stage Solana teams."
+   },
+   {
+    "t": 643,
+    "text": "MonkeDAO's Monkey Foundry is an incubator for early-stage startups; Monkey Ventures is an investment syndicate; together they create a flywheel to support builders in the ecosystem."
+   },
+   {
+    "t": 1107,
+    "text": "Monkey Foundry demo day happening May 4th in Miami with early-stage teams pitching to investors for 5 minutes, with over 250 investors already signed up to attend."
+   },
+   {
+    "t": 1111,
+    "text": "Applications for Monkey Foundry pitching teams close next Tuesday with very limited spots available due to high volume."
+   },
+   {
+    "t": 1256,
+    "text": "MonkeDAO is the first NFT DAO on Solana from 2021, now a globally distributed community of 3,000+ members with local chapters across 20+ countries and 80+ different countries represented."
+   },
+   {
+    "t": 1752,
+    "text": "Breakout consumer products on Solana will be better iterations of existing web2 solutions optimized by blockchain, similar to how Uber improved taxis and Airbnb improved hotels."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "KR2vumXfuLg": {
+  "tldr": "IXS Finance is an infrastructure platform for tokenizing real-world assets, founded by Julian Kwan in 2018. The company operates licenses in multiple jurisdictions and just opened in the US; the most striking element is their Bitcoin Real Yield product with BitGo, which lets Bitcoin holders borrow stablecoins at 0% interest (via structured collar loans) or 6% annualized to invest in tokenized private credit returning 6-15%, creating yield on idle Bitcoin without liquidating it.",
+  "topics": [
+   {
+    "t": 43,
+    "text": "IXS was one of the first RWA platforms, starting in 2018 as a security token infrastructure for issuance, trading, and lending across real-world assets."
+   },
+   {
+    "t": 254,
+    "text": "IXS just officially opened in the US last month to onboard US institutions after being licensed out of the Bahamas and operating globally."
+   },
+   {
+    "t": 368,
+    "text": "Current TVL is $88 million, with historical focus on real estate but recent pivot to yield-bearing financial instruments like treasuries and money market funds."
+   },
+   {
+    "t": 792,
+    "text": "Real asset tokens address the 'not your keys, not your coins' problem differently: if a thief steals your real estate token, the issuer will not redeem it for a stranger, making cybersecurity risk fundamentally different from crypto."
+   },
+   {
+    "t": 1022,
+    "text": "IXS operates as infrastructure with B2B partnerships powering the backend of four crypto exchanges serving 25 million users, plus LINE's 200 million users in Japan."
+   },
+   {
+    "t": 1313,
+    "text": "Bitcoin Real Yield product with BitGo: structured collar loans at 0% interest with 50% LTV and price floor/ceiling; or simple collateralized loans at 35% LTV with 6% annualized interest."
+   },
+   {
+    "t": 1786,
+    "text": "IXS token: 180 million fully distributed with ~10% held by team, ~10% by treasury, rest publicly traded; 20% of platform revenues flow to token buyback and burn."
+   },
+   {
+    "t": 2313,
+    "text": "Parent company Parent Code raised $8-9 million in equity from investors including Coinbase and UOB Bank Singapore; planning growth capital raise as US market opens."
+   },
+   {
+    "t": 2520,
+    "text": "Revenue model: percentage of AUM on Bitcoin product, revenue share with B2B partners (crypto exchanges, fintechs), advisory services, and SaaS fees for tokenization-only clients."
+   },
+   {
+    "t": 2565,
+    "text": "Major real estate asset coming to platform in near-term to significantly increase TVL; pipeline includes inquiries spanning commodities, startups, pre-IPO stocks, and shipping transport."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "sZtaYOWQm44": {
+  "tldr": "Printr is a launchpad that lets anyone create tokens with instant liquidity, and founder Fed Online discusses Printr V2, which introduces \"proof of belief\" staking to realign incentives so traders hold longer than 10-20 seconds—the platform saw $25-30M volume in its first 24 hours with support from every major foundation and protocol, and plans a TGE with an airdrop soon.",
+  "topics": [
+   {
+    "t": 180,
+    "text": "Fed's background: two years leading Printr after strategy consulting roles, previously led DeFi at Axel and was known as a crosschain expert."
+   },
+   {
+    "t": 326,
+    "text": "Printr V1 launched October 2023 as an omnichain launchpad using Layer Zero for built-in token bridging, but failed to gain traction in the low-liquidity post-crash environment."
+   },
+   {
+    "t": 525,
+    "text": "Pain point: traders hold for only 10-20 seconds because there's no incentive to hold; creators take little risk and most fees, misaligning incentives."
+   },
+   {
+    "t": 834,
+    "text": "Proof of belief staking mechanic: gives a chunk of fees to stakers, incentivizing holding; 180-day stakers get a 3x multiplier on rewards."
+   },
+   {
+    "t": 1032,
+    "text": "Fee structure: Printr charges 0.4% flat on bonding curve and 0.2% post-curve—lowest in industry; creators can set custom fees that go to staking pools."
+   },
+   {
+    "t": 1222,
+    "text": "Early traction: belief token hit 6M market cap, $25-30M total volume in first 24 hours, putting Printr at number one or two market share among launchpads."
+   },
+   {
+    "t": 1822,
+    "text": "Crosschain arbitrage: tokens launched on multiple chains can be arbitraged by traders, keeping prices efficient across chains via Layer Zero bridges."
+   },
+   {
+    "t": 2226,
+    "text": "Platform optionality: creators can customize fee distribution, buybacks, staking, compound liquidity, starting market cap, graduation cap, liquidity profile, token supply, and pairing assets."
+   },
+   {
+    "t": 2706,
+    "text": "Funding: $4.5M raised total—$2.5M prelude closed November 2024 from founders and foundations, $2M Series A led by Bybit Ventures with 6 months runway remaining."
+   },
+   {
+    "t": 2876,
+    "text": "TGE timeline: Printr token launching soon with airdrop to points-program participants; token will list on leading centralized exchanges and have onchain liquidity."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "1a_Q0DJoQRs": {
+  "tldr": "Titan is a Solana DEX aggregator and meta-router founded by Chris, a former hedge fund trader, that claims to beat Jupiter and other routers 80% of the time by using proprietary algorithms and on-chain execution. The most striking claim: Titan's Dart router executes trades on-chain at execution time rather than holding stale quotes, enabling it to beat Binance VIP9 pricing without requiring massive trading volume or net worth.",
+  "topics": [
+   {
+    "t": 46,
+    "text": "Chris is CEO and co-founder, previously worked at hedge funds on US equities, then shifted to crypto in 2018 building custodial and trading systems, saw opportunity for a DEX aggregator on Solana in early 2024."
+   },
+   {
+    "t": 151,
+    "text": "Titan's router wins more than 80% of the time versus competitors because other players use mathematically wrong approaches; the execution-to-quote gap problem exists because Solana blocks move every 400 milliseconds but quotes are held for 10 seconds."
+   },
+   {
+    "t": 248,
+    "text": "Dart, Titan's on-chain router launched Monday, splits transactions across multiple pools at execution time rather than locking in a route, functioning like a true market order that finds best prices across available venues right when the trade executes."
+   },
+   {
+    "t": 605,
+    "text": "Titan has integrated with more than 80 DEX protocols on Solana including Raydium, Meteora, Pump Swap, Marinade, Zerofi, Goonfied, and Bisonfi, functioning as a meta-aggregator that also pulls quotes from Jupiter, OKX, and 0x."
+   },
+   {
+    "t": 836,
+    "text": "Argos is Titan's off-chain router that performs extremely well and handles complex mathematical analysis; on-chain Dart router executes the decisions at the last second, reducing quote-to-execution gap that creates slippage."
+   },
+   {
+    "t": 1054,
+    "text": "Solana's technical structure enables fast, low-cost transactions that attract market makers to quote directly on-chain, creating a self-reinforcing loop with retail traders and more liquidity; only Solana and Hyperliquid are credible for trading infrastructure."
+   },
+   {
+    "t": 1502,
+    "text": "Dart enables compliance with US securities regulation requiring best execution price guarantees; this feature could unlock regulatory approval for tokenized equities and RWAs on-chain, driving institutional adoption."
+   },
+   {
+    "t": 1741,
+    "text": "Titan currently operates on zero fees, prioritizing market share and mind share on Solana; future monetization models include payment for order flow similar to Robinhood and Citadel, plus specialized order types like limit orders and DCA."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
+ },
+ "qNtG-i40KV4": {
+  "tldr": "Stable is bringing mortgages on-chain to Solana, enabling homeowners to access equity as liquidity and earn yield through USDX, a mortgage-backed stablecoin. Founder Winston explains how the project turns real estate equity into tradeable assets and has already issued the first blockchain-native mortgage—a $114,000 loan on Solana.",
+  "topics": [
+   {
+    "t": 130,
+    "text": "Stable turns real estate equity into liquidity by bringing the mortgage market on-chain, starting with US mortgages at origination through securities level."
+   },
+   {
+    "t": 315,
+    "text": "Home equity accounts allow users to borrow against unused equity at loan-to-value ratios like 85%, with borrowed funds earning yield in strategies paying 10-15%, with spreads going back toward the mortgage."
+   },
+   {
+    "t": 914,
+    "text": "First blockchain-native mortgage issued: a $114,000 loan funded through a home equity account, represented as an NFT on Solana tracking payments, penalties, and amortization."
+   },
+   {
+    "t": 1332,
+    "text": "USDX is a mortgage-backed stablecoin minted against these loans; holders become liquidity providers, and the yield comes from borrowers making interest payments on the underlying mortgages."
+   },
+   {
+    "t": 1624,
+    "text": "USDX security: if redemptions spike, Stable can use warehouse lines of credit from mortgage lenders to fund loans in dollars instead, then liquidate the underlying mortgages in the $13 trillion US mortgage-backed securities market with $300 billion daily trading volume."
+   },
+   {
+    "t": 2016,
+    "text": "Go-to-market shifting from direct consumer outreach to B2B distribution through mortgage brokers, banks, and wealth advisors by summer; existing brokers already onboard thousands of users monthly."
+   },
+   {
+    "t": 2300,
+    "text": "Security is the top priority: Winston aims to ensure homeowners are the last to absorb any losses because headline risk of 'grandma lost her house' would destroy the business and trigger lawsuits."
+   },
+   {
+    "t": 2390,
+    "text": "If USDX fails, it still gives ordinary people access to yields that banks monopolize, eventually letting communities set their own lending rates to neighbors."
+   }
+  ],
+  "model": "anthropic/claude-haiku-4.5"
  }
 }

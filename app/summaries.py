@@ -64,7 +64,10 @@ Rules:
 from elsewhere.
 - These are auto-generated captions with no speaker labels, and an \
 interview has at least two people in it. Say "the founder" or "the host" \
-unless the transcript itself makes a name unambiguous. Unusual project \
+unless the transcript itself makes a name unambiguous. Being ADDRESSED \
+is not a name: "dude", "bro", "man", "boss", "guys" are how people talk \
+to each other, and one summary opened "Dude, founder of RatSpeak" \
+because the transcript had somebody say it. Unusual project \
 names are often transcribed wrongly; use the spelling from the episode \
 title, which is human-written.
 - This is informational, never investment advice. Report what was \
@@ -102,6 +105,19 @@ def stamped_transcript(episode: Episode,
         out.append(line)
         total += len(line) + 1
     return "\n".join(out)
+
+
+# Words that are how people address each other, not names. A summary
+# opened "Dude, founder of RatSpeak" because a caption had somebody say
+# it, and a TL;DR that misnames the founder in its first word is worse
+# than one that says "the founder" — it reads as confidently wrong.
+_NOT_A_NAME = re.compile(
+    r"^(dude|bro|man|guys|buddy|boss|sir|mate|yeah|okay|hey)\b",
+    re.IGNORECASE)
+
+
+def looks_misattributed(tldr: str) -> bool:
+    return bool(_NOT_A_NAME.match((tldr or "").strip()))
 
 
 _JSON = re.compile(r"\{.*\}", re.S)

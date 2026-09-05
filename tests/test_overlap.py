@@ -94,3 +94,27 @@ def test_shingles_are_long_enough_to_mean_something():
     a = shingles("the market is up today and everyone is very happy")
     b = shingles("the market is down today and everyone is very sad")
     assert not (a & b)
+
+
+# --- summaries: a filler word is not the founder's name ----------------
+
+def test_being_addressed_is_not_a_name():
+    """One summary opened "Dude, founder of RatSpeak" because a caption
+    had somebody say it. A TL;DR that misnames the founder in its first
+    word is worse than one saying "the founder" — it reads as
+    confidently wrong."""
+    from app.summaries import looks_misattributed
+    for bad in ["Dude, founder of RatSpeak, discusses...",
+                "Bro explains the fee split",
+                "Guys from the team walk through it",
+                "yeah so the founder says"]:
+        assert looks_misattributed(bad), bad
+
+
+def test_a_real_name_or_a_role_is_left_alone():
+    from app.summaries import looks_misattributed
+    for good in ["Dakota, the founder of Sinjoh, explains...",
+                 "The founder of Ratspeak discusses...",
+                 "Ratspeak is an offline-capable mesh network",
+                 "Duncan walks through the fee split"]:
+        assert not looks_misattributed(good), good
