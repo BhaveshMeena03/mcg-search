@@ -53,7 +53,12 @@ QUESTIONS = ROOT / "data" / "questions.txt"
 # Any http(s) link, and markdown's [text](target) regardless of scheme.
 _URL = re.compile(r"https?://\S+|www\.\S+")
 _MD_LINK = re.compile(r"\[[^\]]+\]\([^)]+\)")
-_TIMESTAMP = re.compile(r"\[?\b\d{1,2}:\d{2}(?::\d{2})?\b\]?")
+# A citation, not a clock. "they stream at 12:00 PM Eastern" is a time
+# of day and was flagged as a citation pointing at a line no passage
+# carried — the answer was correct and the grader was reading a schedule.
+_TIMESTAMP = re.compile(
+    r"\[?\b\d{1,2}:\d{2}(?::\d{2})?\b\]?(?!\s*(?:am|pm|a\.m|p\.m)\b)",
+    re.IGNORECASE)
 
 # Openings that must never precede a citation. Taken from the rule in
 # the system prompt, which was written after both halves of this went

@@ -271,3 +271,19 @@ def test_one_good_citation_among_several_does_not_warn():
 
 def test_no_hits_means_no_citation_warning():
     assert _check("refuse", "I couldn't find that.", [])[1] == []
+
+
+def test_a_time_of_day_is_not_a_citation():
+    """"they stream Monday to Friday at 12:00 PM Eastern" was flagged as
+    a citation pointing at a line no passage carried. The answer was
+    right; the grader was reading a schedule."""
+    hits = [_Hit("[4:12] they talk about the schedule")]
+    warns = _check("", "They stream at 12:00 PM Eastern time.", hits)[1]
+    assert warns == []
+
+
+def test_a_real_citation_beside_a_clock_still_counts():
+    hits = [_Hit("[4:12] the fee split")]
+    warns = _check("", "At [4:12] he explains it; they stream at 9:30 AM.",
+                   hits)[1]
+    assert warns == []
