@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from app.config import get_settings  # noqa: E402
+from app.overlap import nearby, reference_shingles  # noqa: E402
 from app.schemas import Episode  # noqa: E402
 from app.search import MCGIndex  # noqa: E402
 
@@ -163,10 +164,24 @@ async def main(argv: list[str]) -> int:
             todo = [e for vid, e in ids.items() if vid not in present]
         log(f"{len(episodes) - len(todo)} already indexed, {len(todo)} to do")
 
+    # Clips, for deduplicating streams against. Built from the file
+    # rather than from `todo`, because a stream is usually indexed after
+    # the interviews cut out of it are already in.
+    clips = [e for e in json.loads(DATA.read_text())
+             if e.get("format", "interview") == "interview"]
+
     total = 0
     started = time.monotonic()
     for i, episode in enumerate(todo, 1):
-        count = await idx.ingest([episode])
+        reference = None
+        if episode.format == "stream":
+            # Only the clips published within a week: the interviews go
+            # up a day or two after the broadcast they came from, and
+            # comparing against the whole archive would mean holding
+            # millions of shingles for no gain.
+            reference = reference_shingles(
+                nearby(clips, episode.published_at))
+        count = await idx.ingest([episode], reference)
         total += count
         elapsed = int(time.monotonic() - started)
         log(f"[{i}/{len(todo)}] +{count} windows ({total} total, {elapsed}s) "

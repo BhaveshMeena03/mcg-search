@@ -25,6 +25,7 @@ from pinecone import Pinecone
 
 from .config import get_settings
 from .embeddings import embed_query, embed_texts, rerank_order
+from .overlap import is_duplicate
 from .schemas import Episode, Hit, SearchResponse, TranscriptSegment
 
 logger = logging.getLogger(__name__)
@@ -471,13 +472,33 @@ class MCGIndex:
         return self._index
 
     # -- ingestion ----------------------------------------------------------
-    async def ingest(self, episodes: list[Episode]) -> int:
+    async def ingest(self, episodes: list[Episode],
+                     reference: set[str] | None = None) -> int:
+        """Index episodes, skipping stream windows already in a clip.
+
+        `reference` is the shingle set of the clips a stream might
+        contain — see app/overlap.py. Measured on a real broadcast, 43%
+        of its windows are the interviews that were cut out of it and
+        published separately, and indexing those again would let the
+        same conversation be retrieved twice, with the worse copy
+        sometimes winning: a citation into a 42-minute episode about one
+        project beats the identical words two hours forty into a
+        four-hour stream.
+
+        None means index everything, which is what a clip wants.
+        """
         rows: list[dict] = []
+        skipped = 0
         for ep in episodes:
             for start_t, text, line_times in _windows(
                 ep.segments, self._settings.chunk_max_chars, overlap_segments=2
             ):
+                if (reference and ep.format == "stream"
+                        and is_duplicate(text, reference)):
+                    skipped += 1
+                    continue
                 rows.append({
+                    "format": ep.format,
                     "episode_id": ep.episode_id,
                     "title": ep.title,
                     "url": ep.url,
@@ -495,6 +516,9 @@ class MCGIndex:
                     **({"published_at": ep.published_at}
                        if ep.published_at else {}),
                 })
+        if skipped:
+            logger.info("skipped %d window(s) already published as a clip",
+                        skipped)
         if not rows:
             return 0
 
@@ -636,6 +660,13 @@ class MCGIndex:
         if going_direct or not pin or not self._settings.anthropic_base_url:
             return {}
         return {"X-Pod-Providers": pin}
+
+    def _proxy_headers_kwargs(self, going_direct: bool = False) -> dict:
+        """The pin as create() kwargs, or nothing. Lets callers outside
+        this class — the summariser — route the same way a search does
+        without reaching into request internals."""
+        headers = self._proxy_headers(going_direct)
+        return {"extra_headers": headers} if headers else {}
 
     def _build_request(self, query: str, hits: list[Hit],
                        going_direct: bool = False) -> dict:

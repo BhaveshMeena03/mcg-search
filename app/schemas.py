@@ -29,6 +29,12 @@ class Episode(BaseModel):
     url: str
     platform: Literal["youtube"] = "youtube"
     published_at: str | None = None
+    # An interview is a 40-minute clip about one project. A stream is the
+    # four-hour broadcast it was cut from, most of which is market talk
+    # that appears in no clip. They retrieve differently and the page
+    # labels them differently, so the distinction is stored rather than
+    # guessed from the title.
+    format: Literal["interview", "stream"] = "interview"
     segments: list[TranscriptSegment]
 
 
