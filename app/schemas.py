@@ -52,6 +52,10 @@ class Hit(BaseModel):
     # for nothing. Excluded from API responses.
     text_ts: str = Field(default="", exclude=True)
     published_at: str | None = None
+    # "interview" or "stream". Sent to the browser so a card can say
+    # which, and given to the model so it can prefer a dedicated episode
+    # over the four-hour broadcast the episode was cut from.
+    format: str = "interview"
     score: float
 
 

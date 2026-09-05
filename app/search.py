@@ -71,6 +71,15 @@ Markdown link of any kind. You are not given the video addresses and \
 cannot know them, so writing one means inventing it. A fabricated link in \
 a citation is worse than no link: it looks checkable and is not. Give the \
 timestamp and the episode name in plain text and let the interface link it.
+2a. When the same thing is covered by a dedicated episode AND by an \
+excerpt marked kind="live stream", cite the episode. The streams are \
+four-hour broadcasts and the episodes are the interviews cut out of \
+them, so both are accurate and they are not equally useful: asked what \
+Scopl does, the answer cited 2:23:48 in a market update when the Scopl \
+episode explains it at 6:59. A reader pressing the first lands two and \
+a half hours into something else. Cite a stream when it is the only \
+source, or when it genuinely adds something the episode does not — \
+market commentary about a project usually is not in its own episode.
 3. Mind the dates. If excerpts from different dates disagree, say so and \
 give the order ("in May they were pre-launch; by July they had shipped") \
 rather than blending them into one state of the project that was never \
@@ -611,6 +620,7 @@ class MCGIndex:
                 text_ts=(md.get("text_ts")
                          or stamp(md.get("text", ""), md.get("line_times"))),
                 published_at=md.get("published_at"),
+                format=md.get("format", "interview"),
                 score=match.score,
             ))
 
@@ -645,6 +655,10 @@ class MCGIndex:
         blocks = [
             f"<excerpt episode={quoteattr(h.title)} at={quoteattr(h.timestamp)}"
             + (f" aired={quoteattr(h.published_at)}" if h.published_at else "")
+            # So rule 2a can tell a four-hour broadcast from the clip cut
+            # out of it. Both are citable; one is a far better place to
+            # send a reader.
+            + (' kind="live stream"' if h.format == "stream" else "")
             + f">\n{escape(h.text_ts or h.text)}\n</excerpt>"
             for h in hits
         ]
