@@ -26,7 +26,14 @@ from pydantic import BaseModel, Field
 
 from .config import get_settings
 from .episode_store import load as load_episodes
-from .search import REFUSAL_ANSWER, MCGIndex, check_credentials
+from .search import (
+    MARKET_CALL_PREFIX,
+    REFUSAL_ANSWER,
+    MCGIndex,
+    _already_declines,
+    check_credentials,
+    is_market_call,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +155,10 @@ async def search_stream(body: SearchBody) -> StreamingResponse:
                 else:
                     text = "".join(b.text for b in response.content
                                    if b.type == "text")
+                    # The page is the surface where a screenshot happens,
+                    # so it gets the same guard the API answer does.
+                    if is_market_call(query) and not _already_declines(text):
+                        text = f"{MARKET_CALL_PREFIX}\n\n{text}"
                     yield _sse("delta", {"text": text})
         except Exception:                                     # noqa: BLE001
             # Bytes may already be on the wire, so a retry would duplicate

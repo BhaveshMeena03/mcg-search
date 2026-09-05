@@ -160,6 +160,26 @@ answer named a guest's number-one coin, reading "your" as the speaker's. \
 Attributed and dated, and still the wrong shape: a bot that returns a \
 coin name to that question is screenshotted as having picked it. Decline \
 first, then say what guests named if it is useful.
+6c. RELAYING A MARKET CALL IS STILL GIVING ONE. The archive now \
+includes four-hour live market broadcasts, where the hosts say what they \
+are buying and where they think prices go. Attribution does not make \
+that safe to pass on: "they are advocating buying the dip, and called \
+Pawns obviously a buy the dip coin" is a coin recommendation with a \
+citation attached, and it is read as one. That answer was produced by \
+this tool and is why this rule exists.\
+ So before answering, look at what the answer will SAY, not at how the \
+question was phrased. If it amounts to buy this, sell this, or this \
+will reach that price — whoever said it first — open by declining, then \
+report it as commentary: who said it, when, and that it was their view \
+at that moment rather than a call this tool is passing on. Never lead \
+with the position. Never name an asset as a buy or a sell in your first \
+sentence.
+6d. What IS fine, and should not be refused: what a project does, what \
+was claimed about it, what a founder said about their own company, what \
+topics were covered, what happened in a market and when. "What did they \
+say about the Fed decision" is reporting. "What are they buying" is not, \
+however it is worded — and the difference is the answer, not the \
+question.
 6b. A decline is not the denial rule 1a forbids. Rule 1a is about \
 claiming you could not FIND something you did find. Saying "I can't tell \
 you what to buy" and then citing what was said is the correct shape, and \
@@ -280,6 +300,54 @@ def stamp(text: str, line_times) -> str:
 
 
 PLACEHOLDER_KEY = "unused-auth-is-in-the-base-url"
+
+# Questions whose honest answer is a trading instruction.
+#
+# The archive now holds four-hour market broadcasts where hosts say what
+# they are buying. Attribution does not make that safe to relay: asked
+# whether they are saying to buy the dip, this tool answered "the hosts
+# are advocating a buy the dip strategy" and named a coin. Cited, true,
+# and indistinguishable from a recommendation to anybody screenshotting
+# it.
+#
+# The prompt was told not to. It complied about five times in six —
+# measured, on identical repeated runs — which is fine for style and not
+# fine for this. So the decline is prepended in code, where it cannot be
+# argued out of, and the answer still follows it.
+_MARKET_CALL = re.compile(
+    r"\b(buy|buying|sell|selling|short|long|ape|aping)\b.{0,40}\b"
+    r"(dip|now|this|it|in|into)\b"
+    r"|\bbullish\b|\bbearish\b|\bprice target\b|\bbetting on\b"
+    r"|\bwhat (should|would) (i|you) (buy|sell|invest|allocate)"
+    r"|\bworth (buying|selling|investing)\b"
+    r"|\b(moon|pump|100x|10x)\b",
+    re.IGNORECASE,
+)
+
+MARKET_CALL_PREFIX = (
+    "I can't tell you what to buy or sell, and anything the hosts say "
+    "about a trade is their view at that moment, not a recommendation "
+    "from this tool. What was actually said:"
+)
+
+
+def is_market_call(question: str) -> bool:
+    return bool(_MARKET_CALL.search(question or ""))
+
+
+def _already_declines(answer: str) -> bool:
+    """Has the answer opened by declining on its own?
+
+    Only the opening counts. An answer that names a coin and adds a
+    caveat at the end has already been read by then.
+    """
+    opening = " ".join(
+        re.split(r"(?<=[.!?])\s", (answer or "").strip())[:1]
+    ).lower()
+    return any(p in opening for p in (
+        "i can't", "i cannot", "i won't", "i will not",
+        "couldn't find", "could not find", "not investment advice",
+    ))
 
 # Below this, a "question" carries no subject to search for. Three
 # characters keeps real ones: tickers get asked about as "$UP", and "wen"
@@ -825,4 +893,7 @@ class MCGIndex:
             return SearchResponse(answer=REFUSAL_ANSWER, hits=[],
                                   model=response.model, refused=True)
         answer = "".join(b.text for b in response.content if b.type == "text")
+        # Deterministic, because the prompt rule is not. See _MARKET_CALL.
+        if is_market_call(query) and not _already_declines(answer):
+            answer = f"{MARKET_CALL_PREFIX}\n\n{answer}"
         return SearchResponse(answer=answer, hits=hits, model=response.model)
