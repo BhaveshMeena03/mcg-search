@@ -71,8 +71,8 @@
 
 # --- 7. Attribution traps ---------------------------------------------
 # The question names someone. Rule 5a: a name in the QUESTION is not
-# evidence about the excerpts. This is the exact failure that published
-# "Banks losing $254,000" on the Market Bubble archive.
+# evidence about the excerpts. This is the exact failure that once
+# published a six-figure loss under the wrong person's name.
 # second-hand: MetaDAO reports Ansem watches MCG. Neither a clean answer
 # nor a clean refusal — the right behaviour is to report it WITH the caveat.
 what did Ansem say about MCG

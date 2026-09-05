@@ -8,9 +8,9 @@
 # above and the bot cannot see it.
 #
 # The stakes are different here too. A bad answer in the CLI is a bad
-# answer; a bad answer here is a public post under Lex's name. On the
-# Market Bubble bot the two that actually went out were a misattributed
-# quote and a number carried onto the wrong asset.
+# answer; a bad answer here is a public post. The two that have actually
+# gone out on a bot like this were a misattributed quote and a number
+# carried onto the wrong asset.
 
 # --- 24. How people really type ----------------------------------------
 [answer] wen clawpump

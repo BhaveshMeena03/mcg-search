@@ -1,9 +1,9 @@
 """Concurrent writes to data/episodes.json.
 
 This is the file a 3.5-hour fetch writes into one episode at a time. The
-bug this guards against already happened once on the Market Bubble
-archive: a long-running writer merged against the snapshot it started
-with and silently reverted everything finished in between.
+bug this guards against has already happened once in practice: a
+long-running writer merged against the snapshot it started with and
+silently reverted everything finished in between.
 """
 
 import json

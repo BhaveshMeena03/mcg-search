@@ -1,9 +1,9 @@
 """Configuration for MCG search.
 
 Everything comes from the environment (or a local .env), so no key is ever
-in the source. The defaults below are the ones the Market Bubble index was
-tuned to over ~1,100 tests — they are a starting point here, not a result,
-and the ones worth re-measuring on this archive are marked.
+in the source. The defaults below were tuned on a comparable archive and
+are a starting point here, not a result; the ones worth re-measuring on
+this one are marked.
 """
 
 from functools import lru_cache
@@ -30,9 +30,9 @@ class Settings(BaseSettings):
     # in app/search.py decides which of the two is in play, and never
     # sends a real key anywhere but Anthropic's own host.
     anthropic_api_key: str = ""
-    # Haiku 4.5 is what Market Bubble search answers on. The job is to
-    # summarise passages that retrieval already found, not to reason from
-    # scratch, and the small model does that at ~$0.004 a question.
+    # Haiku 4.5. The job is to summarise passages retrieval already
+    # found, not to reason from scratch, and the small model does that at
+    # about $0.004 a question.
     search_model: str = "claude-haiku-4-5"
     search_max_tokens: int = 1024
     # Measured, not guessed. Through the proxy the same question took
@@ -90,19 +90,31 @@ class Settings(BaseSettings):
 
     # --- Pinecone ----------------------------------------------------------
     pinecone_api_key: str
-    # MCG gets its OWN index. See the guard in scripts/ingest_episodes.py —
-    # pointing this at bullpen-concierge is the one mistake that could reach
-    # the live Market Bubble search, so it is refused rather than documented.
+    # MCG gets its own index. See check_target in
+    # scripts/ingest_episodes.py for how to mark others off-limits.
     pinecone_index: str = "mcg-search"
     pinecone_namespace: str = "mcg"
+
+    # Indexes and namespaces the ingest must refuse to write to, comma
+    # separated. Empty by default.
+    #
+    # This exists because one Pinecone account can hold several
+    # unrelated projects, and a scheduled job with a wrong .env is the
+    # one mistake here that reaches something else's data. It is
+    # configuration rather than a constant in the source so this repo
+    # carries no knowledge of what else happens to share the account —
+    # a deployment's neighbours are its operator's business, not
+    # something to publish in a codebase.
+    protected_indexes: str = ""
+    protected_namespaces: str = ""
     pinecone_write_timeout_seconds: float = 60.0
     pinecone_read_timeout_seconds: float = 20.0
 
     # --- Retrieval ---------------------------------------------------------
     # Worth re-measuring on this archive. MCG is one project per episode,
-    # where Market Bubble is forty topics per broadcast, so the right number
-    # of passages to feed an answer is probably not the same. Starting with
-    # what is known to work rather than with a guess.
+    # rather than forty topics per broadcast, so the right number of
+    # passages to feed an answer is probably not what it is elsewhere.
+    # Starting from a known-good number rather than a guess.
     retrieval_top_k: int = 6
     retrieval_min_score: float = 0.05
     chunk_max_chars: int = 2400

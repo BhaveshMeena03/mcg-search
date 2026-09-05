@@ -1,7 +1,6 @@
 """The MCG search API and the page it serves.
 
-Endpoint names mirror the Market Bubble service so the two read the same
-way to anyone who has seen both:
+Endpoints:
 
     GET  /                       the page
     GET  /v1/episodes            what is indexed, newest first

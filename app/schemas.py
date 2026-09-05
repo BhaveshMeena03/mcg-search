@@ -1,8 +1,7 @@
 """The shapes that move through the pipeline.
 
-Deliberately small. The Market Bubble version of this file also carries the
-chat/docs models for a support bot; MCG is search only, so it needs the
-episode side and nothing else.
+Deliberately small: MCG is search only, so this needs the episode side
+and nothing else.
 """
 
 from typing import Literal

@@ -1,10 +1,9 @@
 """Safe concurrent access to data/episodes.json.
 
-Taken across from the Market Bubble index, where it was written after a
-real loss: a fetcher read the file at startup, worked for hours, and wrote
-its own copy back at exit, silently reverting everything that finished in
-between. An episode vanished and it was only noticed because the count
-looked wrong later.
+Written after a real loss: a fetcher read the file at startup, worked for
+hours, and wrote its own copy back at exit, silently reverting everything
+that finished in between. An episode vanished and it was only noticed
+because the count looked wrong later.
 
 That matters more here, not less. 407 episodes is not one run — it is a
 fetch you start, interrupt, and resume over days, possibly with two

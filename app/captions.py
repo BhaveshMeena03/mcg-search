@@ -1,7 +1,6 @@
 """WebVTT parsing.
 
-Taken across from the Market Bubble index unchanged, because the tricky
-part is already solved here: YouTube auto-captions roll a window forward,
+The tricky part is already solved here: YouTube auto-captions roll a window forward,
 so consecutive cues repeat a prefix of text already emitted. `_new_tail`
 strips that at word granularity. Reimplementing it would only find the
 same bug again.

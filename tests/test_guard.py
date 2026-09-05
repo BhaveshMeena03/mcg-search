@@ -1,9 +1,12 @@
-"""The guard that keeps this repo away from the live Bullpen index.
+"""The guard that keeps a scheduled ingest off somebody else's data.
 
-This is the one test in the suite that protects something outside this
-repo. search.lexthedev.com reads index 'bullpen-concierge', namespace
-'podcast'; a wrong .env here is the only path from this codebase to that
-data, so the refusal is asserted rather than assumed.
+One Pinecone account can hold several unrelated projects, and a wrong
+.env in a job nobody is watching is the only path from this codebase to
+data that is not its own. The refusal is asserted rather than assumed.
+
+Deliberately configuration rather than constants: this repo carries no
+knowledge of what else shares the account, because a deployment's
+neighbours are its operator's business.
 """
 
 import importlib.util
@@ -25,30 +28,50 @@ def _load_ingest():
 
 
 class FakeSettings:
-    def __init__(self, index: str, namespace: str) -> None:
+    def __init__(self, index: str, namespace: str,
+                 protected_indexes: str = "", protected_namespaces: str = ""):
         self.pinecone_index = index
         self.pinecone_namespace = namespace
+        self.protected_indexes = protected_indexes
+        self.protected_namespaces = protected_namespaces
 
 
-def test_refuses_the_live_bullpen_index():
+def test_refuses_a_protected_index():
     ingest = _load_ingest()
     with pytest.raises(SystemExit) as exc:
-        ingest.check_target(FakeSettings("bullpen-concierge", "mcg"))
-    assert "bullpen-concierge" in str(exc.value)
+        ingest.check_target(
+            FakeSettings("other-project", "mcg", protected_indexes="other-project")
+        )
+    assert "other-project" in str(exc.value)
 
 
-@pytest.mark.parametrize(
-    "namespace", ["podcast", "clawpump", "questions", "summaries", "assets"]
-)
-def test_refuses_every_namespace_the_bullpen_project_uses(namespace):
+@pytest.mark.parametrize("namespace", ["alpha", "beta", "gamma"])
+def test_refuses_a_protected_namespace(namespace):
     ingest = _load_ingest()
     with pytest.raises(SystemExit):
-        ingest.check_target(FakeSettings("mcg-search", namespace))
+        ingest.check_target(FakeSettings(
+            "mcg-search", namespace,
+            protected_namespaces="alpha,beta,gamma"))
 
 
 def test_allows_the_mcg_target():
     ingest = _load_ingest()
     ingest.check_target(FakeSettings("mcg-search", "mcg"))  # must not raise
+
+
+def test_nothing_is_protected_by_default():
+    """A fresh install must not trip over a guard it never configured."""
+    ingest = _load_ingest()
+    ingest.check_target(FakeSettings("anything", "at-all"))
+
+
+def test_whitespace_and_empty_entries_are_ignored():
+    ingest = _load_ingest()
+    ingest.check_target(FakeSettings("mcg-search", "mcg",
+                                     protected_indexes=" , ,"))
+    with pytest.raises(SystemExit):
+        ingest.check_target(FakeSettings("x", "mcg",
+                                         protected_indexes=" x , y "))
 
 
 def test_first_window_id_is_deterministic():

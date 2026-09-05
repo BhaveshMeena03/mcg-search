@@ -4,11 +4,10 @@ Ingests timestamped episode transcripts, embeds windows of consecutive
 segments (keeping each window's start time), and answers questions with an
 answer plus citations that deep-link to the exact second in the video.
 
-Ported from the Market Bubble index. What came across unchanged is the
-part that took the measuring: the windowing, the separate embedded vs
-stamped text, and the prompt rules that were each written after a wrong
-answer went out in public. What changed is anything specific to a
-two-host broadcast, because MCG is one host interviewing one project.
+The parts that took the measuring are the windowing, the separate
+embedded vs stamped text, and the prompt rules — each written after a
+wrong answer went out in public. Everything here assumes MCG's format:
+one host interviewing one project per episode.
 """
 
 import asyncio
@@ -170,9 +169,7 @@ def _timestamp(seconds: float) -> str:
 def _deep_link(url: str, seconds: float) -> str:
     """A watch URL that jumps to the moment.
 
-    YouTube only, because the whole channel is. The Market Bubble version
-    branched on platform because half that show lives on X, where there is
-    no timestamp parameter at all.
+    YouTube only, because the whole channel is.
     """
     joiner = "&" if "?" in url else "?"
     return f"{url}{joiner}t={int(seconds)}s"
@@ -504,7 +501,7 @@ class MCGIndex:
         embeddings = await embed_texts(
             self._voyage,
             # Embed the title with the window. This matters more here than
-            # it did on Market Bubble: an MCG title names the project, and
+            # it does elsewhere: an MCG title names the project, and
             # the project name is often barely spoken aloud after the
             # intro. Without the title, "what does Umia do" has to match on
             # topic words alone. The stored excerpt stays the transcript,

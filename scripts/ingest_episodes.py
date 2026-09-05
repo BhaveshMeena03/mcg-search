@@ -6,9 +6,8 @@
 
 Incremental by design. Episodes already in the index are skipped, so this
 is safe to re-run after adding episodes and costs nothing for the ones
-already done. The Market Bubble version of this script opens by deleting
-the whole namespace and rebuilding it; at 33 episodes that is a few
-minutes, at 407 it is an hour of embeddings to get back where you were.
+already done. Rebuilding the whole namespace from scratch would be an
+hour of embeddings to get back where you already were.
 
 Run after scripts/fetch_episodes.py.
 """
@@ -37,31 +36,32 @@ def log(msg: str) -> None:
     print(msg, flush=True)  # visible immediately even when redirected
 
 
-# The live Market Bubble search reads index "bullpen-concierge", namespace
-# "podcast" — that is set explicitly in that project's render.yaml, not from
-# a code default, so it is the real production target.
-#
-# This guard exists because a wrong .env is the ONE mistake in this repo
-# that could reach a running product. Everything else here is isolated by
-# construction: separate repo, separate index, separate deploy. A typo in
-# PINECONE_INDEX is not. So it is refused rather than documented.
-PROTECTED_INDEXES = {"bullpen-concierge"}
-PROTECTED_NAMESPACES = {"podcast", "clawpump", "questions", "summaries", "assets"}
+def _protected(raw: str) -> set[str]:
+    return {x.strip() for x in (raw or "").split(",") if x.strip()}
 
 
 def check_target(settings) -> None:
-    """Refuse to write anywhere near the Market Bubble index."""
-    if settings.pinecone_index in PROTECTED_INDEXES:
+    """Refuse to write to an index or namespace marked off-limits.
+
+    One Pinecone account can hold several unrelated projects, and a
+    scheduled job with a wrong .env is the one mistake here that reaches
+    something else's data. Set PROTECTED_INDEXES / PROTECTED_NAMESPACES
+    to whatever this deployment must never touch; both are empty by
+    default, so a fresh install has nothing to trip over.
+    """
+    indexes = _protected(getattr(settings, "protected_indexes", ""))
+    namespaces = _protected(getattr(settings, "protected_namespaces", ""))
+    if settings.pinecone_index in indexes:
         raise SystemExit(
-            f"REFUSING TO RUN: PINECONE_INDEX is '{settings.pinecone_index}', "
-            f"which is the live Market Bubble / Bullpen index.\n"
-            f"MCG must use its own index. Fix PINECONE_INDEX in .env."
+            f"REFUSING TO RUN: PINECONE_INDEX is "
+            f"'{settings.pinecone_index}', which PROTECTED_INDEXES marks "
+            f"as off-limits. Fix PINECONE_INDEX in .env."
         )
-    if settings.pinecone_namespace in PROTECTED_NAMESPACES:
+    if settings.pinecone_namespace in namespaces:
         raise SystemExit(
             f"REFUSING TO RUN: PINECONE_NAMESPACE is "
-            f"'{settings.pinecone_namespace}', which is a namespace the "
-            f"Bullpen project uses. Fix PINECONE_NAMESPACE in .env."
+            f"'{settings.pinecone_namespace}', which PROTECTED_NAMESPACES "
+            f"marks as off-limits. Fix PINECONE_NAMESPACE in .env."
         )
 
 

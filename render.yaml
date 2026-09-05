@@ -18,11 +18,9 @@ services:
     # the free plan's 750 instance-hours covers one service running the
     # whole month.
     #
-    # The alternative was folding this into the bullpen-ai service to
-    # avoid a second bill. Not worth it: that service runs
-    # search.lexthedev.com, the X bot and two Discord bots, and a bad
-    # deploy here would take all of them with it. Isolation is the
-    # feature being bought.
+    # Its own service on purpose. Sharing a container with an unrelated
+    # project would save a bill and cost the isolation: one process, one
+    # deploy, one set of quotas, so a fault here becomes a fault there.
     #
     # Move to starter if the pinger proves unreliable or traffic grows.
     plan: free
