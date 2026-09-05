@@ -199,6 +199,32 @@ h2{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.02
 .ep .d{font-family:var(--mono);font-size:11px;color:var(--ink-3);flex:none;width:78px}
 .ep .t{font-size:14px;line-height:1.45;min-width:0}
 .ep .m{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-left:auto;flex:none}
+.ep .chev{font-family:var(--mono);font-size:10px;color:var(--ink-3);flex:none;transition:transform .18s ease}
+.ep.open .chev{transform:rotate(90deg)}
+.ep-sum{
+  display:none;padding:0 15px 15px 93px;border-bottom:1px solid var(--line-soft);
+  background:var(--panel-2);
+}
+.ep-sum.on{display:block;animation:rise .3s cubic-bezier(.2,.7,.3,1)}
+.ep-sum .tldr{font-size:14px;line-height:1.65;color:var(--ink-2);margin:0 0 14px}
+.ep-sum .topics{display:grid;gap:5px}
+.ep-sum .topic{
+  display:flex;gap:11px;align-items:baseline;cursor:pointer;padding:5px 7px;
+  border-radius:7px;transition:background .14s ease;
+}
+.ep-sum .topic:hover{background:rgba(232,69,60,.09)}
+.ep-sum .topic .t{
+  font-family:var(--mono);font-size:11.5px;color:var(--red);flex:none;
+  min-width:52px;
+}
+.ep-sum .topic .x{font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.ep-sum .topic:hover .x{color:var(--ink)}
+.ep-sum .watch{
+  font-family:var(--mono);font-size:11px;color:var(--ink-3);margin:12px 0 0;
+}
+.ep-sum .watch a{color:var(--red);text-decoration:none}
+.ep-sum .player{border:1px solid var(--line);border-radius:10px;margin:12px 0 0}
+@media(max-width:620px){ .ep-sum{padding-left:15px} }
 
 footer{
   margin:64px 0 0;border-top:1px solid var(--line-soft);padding:22px 0 46px;
@@ -459,19 +485,88 @@ $("#f").onsubmit = async e => {
 
 /* The episode list doubles as proof of scale: 406 rows is the argument
    that this generalises past one show. */
-fetch("/v1/episodes").then(r => r.json()).then(d => {
+let SUMMARIES = {};
+
+Promise.all([
+  fetch("/v1/episodes").then(r => r.json()),
+  // Not fatal: without summaries the list still works, it just does not
+  // expand. Better a plain list than a page that fails to render.
+  fetch("/v1/summaries").then(r => r.json()).catch(() => ({ summaries: {} })),
+]).then(([d, s]) => {
+  SUMMARIES = s.summaries || {};
+  const n = Object.keys(SUMMARIES).length;
   $("#epLede").textContent =
-    `${d.count} interviews · ${d.hours} hours · one project per episode.`;
+    `${d.count} episodes · ${d.hours} hours` +
+    (n ? ` · ${n} with a summary you can expand` : "");
   const box = $("#eps");
   const draw = rows => {
     box.innerHTML = "";
     rows.slice(0, 500).forEach(e => {
-      const a = el("a", "ep");
-      a.href = e.url; a.target = "_blank"; a.rel = "noopener";
+      const row = el("div", "ep");
       const d1 = el("div", "d"); d1.textContent = fmtDate(e.published_at);
       const t = el("div", "t"); t.textContent = e.title;
       const m = el("div", "m"); m.textContent = Math.round(e.seconds / 60) + "m";
-      a.append(d1, t, m); box.appendChild(a);
+      const chev = el("div", "chev");
+      const sum = SUMMARIES[e.id];
+      chev.textContent = sum ? "\u25B6" : "";
+      row.append(d1, t, m, chev);
+
+      const panel = el("div", "ep-sum");
+      box.append(row, panel);
+      if (!sum) {
+        // No summary: the row is still a link out, as it always was.
+        row.style.cursor = "pointer";
+        row.onclick = () => window.open(e.url, "_blank", "noopener");
+        return;
+      }
+      row.style.cursor = "pointer";
+      let built = false;
+      row.onclick = () => {
+        const open = panel.classList.toggle("on");
+        row.classList.toggle("open", open);
+        if (!open) {
+          // Removing the iframe is what stops the audio.
+          const r = panel.querySelector(".ratio"); if (r) r.innerHTML = "";
+          panel.querySelector(".player")?.classList.remove("on");
+          return;
+        }
+        closeAllPlayers();
+        if (built) return;
+        built = true;
+        const tl = el("p", "tldr"); tl.textContent = sum.tldr;
+        const list = el("div", "topics");
+        // Every topic is a moment somebody can press. That is the point
+        // of storing them as {t, text} rather than as prose with times
+        // written into it.
+        sum.topics.forEach(tp => {
+          const row2 = el("div", "topic");
+          const tt = el("span", "t");
+          tt.textContent = `${Math.floor(tp.t / 60)}:${String(tp.t % 60).padStart(2, "0")}`;
+          const xx = el("span", "x"); xx.textContent = tp.text;
+          row2.append(tt, xx);
+          row2.onclick = ev => {
+            ev.stopPropagation();
+            closeAllPlayers();
+            const pl = panel.querySelector(".player");
+            const ratio = pl.querySelector(".ratio");
+            const f = el("iframe");
+            f.allow = "accelerometer; encrypted-media; picture-in-picture";
+            f.allowFullscreen = true;
+            f.src = `https://www.youtube.com/embed/${e.id}` +
+                    `?start=${tp.t}&autoplay=1&rel=0&enablejsapi=1`;
+            ratio.innerHTML = ""; ratio.appendChild(f);
+            pl.classList.add("on");
+            pl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          };
+          list.appendChild(row2);
+        });
+        const pl = el("div", "player"); pl.appendChild(el("div", "ratio"));
+        const watch = el("p", "watch");
+        const a2 = el("a"); a2.href = e.url; a2.target = "_blank";
+        a2.rel = "noopener"; a2.textContent = "open on YouTube \u2192";
+        watch.appendChild(a2);
+        panel.append(tl, list, pl, watch);
+      };
     });
     if (!rows.length) box.innerHTML =
       `<div class="ep"><div class="t" style="color:var(--ink-3)">No episode matches that.</div></div>`;

@@ -98,3 +98,32 @@ def test_a_new_search_stops_playback():
     """Asking a new question while a clip plays should silence it."""
     submit = PAGE.split('#f").onsubmit')[1]
     assert "closeAllPlayers()" in submit.split("fetch(")[0]
+
+
+# --- summaries on the page ---------------------------------------------
+
+def test_the_page_loads_summaries():
+    """404 summaries generated and not shown would be the whole feature
+    sitting in a file nobody reads."""
+    assert "/v1/summaries" in PAGE
+    assert "SUMMARIES" in PAGE
+
+
+def test_a_missing_summaries_endpoint_does_not_break_the_list():
+    """Without summaries the list should still render, just not expand.
+    A page that fails to load because an optional extra is missing is
+    worse than a plain page."""
+    assert "catch(() => ({ summaries: {} }))" in PAGE
+
+
+def test_every_topic_is_a_play_button():
+    """The reason topics are stored as {t, text} rather than as prose
+    with times written into it."""
+    assert "start=${tp.t}" in PAGE
+
+
+def test_collapsing_a_card_stops_the_audio():
+    """Hiding the element leaves the iframe playing, which is how three
+    founders ended up talking over each other."""
+    seg = PAGE.split("const open = panel.classList.toggle")[1][:400]
+    assert 'innerHTML = ""' in seg

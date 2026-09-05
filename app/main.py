@@ -41,6 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 EPISODES = ROOT / "data" / "episodes.json"
 EPISODE_INDEX = ROOT / "data" / "episode_index.json"
+SUMMARIES = ROOT / "data" / "summaries.json"
 
 app = FastAPI(title="MCG Search", docs_url=None, redoc_url=None)
 
@@ -88,6 +89,25 @@ async def episodes() -> dict:
         return {"count": 0, "hours": 0, "episodes": []}
     total = sum(r["seconds"] for r in rows)
     return {"count": len(rows), "hours": round(total / 3600), "episodes": rows}
+
+
+@app.get("/v1/summaries")
+async def summaries() -> dict:
+    """A TL;DR and timestamped topics per episode.
+
+    Search answers a question somebody already thought to ask. This is
+    the other half: how they find the January interview about the thing
+    they are researching today, in an archive where the median episode
+    has about sixty views.
+
+    Served whole — 820KB for 404 episodes — because the page filters
+    client-side and a round trip per expanded card would be slower than
+    sending it once.
+    """
+    if not SUMMARIES.exists():
+        return {"count": 0, "summaries": {}}
+    data = json.loads(SUMMARIES.read_text())
+    return {"count": len(data), "summaries": data}
 
 
 @app.post("/v1/search")
