@@ -83,3 +83,18 @@ def test_transcript_text_is_never_written_as_html():
     the DOM through textContent so a crafted title cannot become markup."""
     assert ".textContent = h.title" in PAGE
     assert ".textContent = h.text" in PAGE
+
+
+def test_only_one_player_can_be_open():
+    """Found by ear: clicking two timestamps left two videos playing, so
+    two founders talked over each other. Hiding the element is not
+    enough — the iframe has to be removed to stop the audio."""
+    assert "closeAllPlayers" in PAGE
+    assert "closeAllPlayers(player)" in PAGE       # opening closes others
+    assert PAGE.count('r.innerHTML = ""') >= 1     # removes, not just hides
+
+
+def test_a_new_search_stops_playback():
+    """Asking a new question while a clip plays should silence it."""
+    submit = PAGE.split('#f").onsubmit')[1]
+    assert "closeAllPlayers()" in submit.split("fetch(")[0]

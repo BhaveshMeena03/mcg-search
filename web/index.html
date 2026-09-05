@@ -330,6 +330,18 @@ EXAMPLES.forEach(t => {
 /* Play the moment in the page rather than sending the reader to YouTube.
    Linking away ends the session; playing inline keeps the answer on
    screen next to the evidence for it. */
+/* Close every open player. Removing the iframe is what actually stops
+   the audio — hiding it leaves it playing, which is how three founders
+   ended up talking over each other during testing. */
+function closeAllPlayers(except) {
+  document.querySelectorAll(".player.on").forEach(p => {
+    if (p === except) return;
+    p.classList.remove("on");
+    const r = p.querySelector(".ratio");
+    if (r) r.innerHTML = "";
+  });
+}
+
 function wirePlayer(root) {
   root.querySelectorAll(".cite-top").forEach(top => {
     top.onclick = () => {
@@ -339,6 +351,9 @@ function wirePlayer(root) {
       if (player.classList.contains("on")) {
         player.classList.remove("on"); ratio.innerHTML = ""; return;
       }
+      // One at a time. These are timestamps into interviews, so a second
+      // one is always a different person mid-sentence.
+      closeAllPlayers(player);
       const f = el("iframe");
       f.allow = "accelerometer; encrypted-media; picture-in-picture";
       f.allowFullscreen = true;
@@ -389,6 +404,7 @@ $("#f").onsubmit = async e => {
   if (!query || busy) return;
   busy = true; $("#go").disabled = true;
 
+  closeAllPlayers();          // a new question should not talk over the old one
   $("#demo").style.display = "none";
   $("#stage").classList.add("on");
   const ans = $("#answer"); ans.textContent = "";
