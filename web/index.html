@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCG Search — ask the MCG archive anything</title>
+<title>MCG Search — ask MCG Live anything</title>
 <meta name="description" content="Semantic search over every MCG interview. Ask a question, get the answer with the moment they said it.">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -260,12 +260,14 @@ footer a{color:var(--ink-2)}
       <span class="mark">MCG</span> · search
       <span class="onair"><i></i>TUE &amp; THU 12:30 EST</span>
     </div>
-    <!-- Filled from /v1/episodes on load. The counts were hardcoded and
-         went stale the day the live streams were indexed: the headline
-         read "406 interviews" over an archive of 458 videos. Anything
-         that claims a number now reads it from the same place the
-         episode list does. -->
-    <h1>Ask <em>the MCG archive</em> anything.</h1>
+    <!-- The headline names the show, not a number. A count in the
+         biggest text on the page is both the thing most likely to go
+         stale — it read "406 interviews" over an archive of 458 videos
+         for as long as the streams had been indexed — and the less
+         interesting half of the sentence. What the archive holds is
+         directly below, filled from /v1/episodes so it cannot drift
+         from the episode list again. -->
+    <h1>Ask <em>MCG Live</em> anything.</h1>
     <p class="sub" id="heroSub">Search by meaning rather than keywords —
       and press a timestamp to hear them say it.</p>
 
@@ -507,15 +509,16 @@ Promise.all([
   ARCHIVE_COUNT = d.count || 0;
   const n = Object.keys(SUMMARIES).length;
 
-  /* The headline, from the data. An interview and a four-hour broadcast
-     are different things to a reader, so both are named rather than
-     summed into one word. */
+  /* What the archive holds, from the data. An interview and a four-hour
+     broadcast are different things to a reader, so both are named rather
+     than summed into one word. The h1 is left alone — it says the show's
+     name, which does not change, and rewriting it here would make the
+     largest text on the page flicker on every load. */
   const fmt = d.by_format || {};
   const parts = [];
   if (fmt.interview) parts.push(`${fmt.interview.count} founder interviews`);
   if (fmt.stream) parts.push(`${fmt.stream.count} live streams`);
   if (parts.length) {
-    $("h1").innerHTML = `Ask <em>${d.count} videos</em> anything.`;
     $("#heroSub").textContent =
       `${parts.join(" and ")} — ${d.hours} hours. Search by meaning ` +
       `rather than keywords, and press a timestamp to hear them say it.`;
