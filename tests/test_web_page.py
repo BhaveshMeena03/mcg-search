@@ -127,3 +127,42 @@ def test_collapsing_a_card_stops_the_audio():
     founders ended up talking over each other."""
     seg = PAGE.split("const open = panel.classList.toggle")[1][:400]
     assert 'innerHTML = ""' in seg
+
+
+# --- counts, which is the other way the page can be confidently wrong ---
+
+def test_the_headline_is_not_a_typed_in_number():
+    """The hero read "Ask 406 interviews anything" over an archive of
+    458 videos, for as long as the streams had been indexed. Nothing on
+    the page contradicted it, because nothing on the page knew.
+
+    A number about the archive belongs to the archive. This checks the
+    visible copy carries none of its own — the counts arrive from
+    /v1/episodes, the same source the episode list already trusted."""
+    body = PAGE.split("<body>", 1)[1]
+    # Strip comments and script, where a number is either explanation or
+    # is being read from the data rather than asserted to the reader.
+    body = re.sub(r"<!--.*?-->", "", body, flags=re.S)
+    body = re.sub(r"<script.*?</script>", "", body, flags=re.S)
+    body = re.sub(r"<style.*?</style>", "", body, flags=re.S)
+    visible = re.sub(r"<[^>]+>", " ", body)
+    # Three or more digits is a claim about scale. Times (12:30) and
+    # small numbers are not, and neither is a year in a dated example.
+    claims = [n for n in re.findall(r"\b\d{3,}\b", visible)
+              if not re.fullmatch(r"(19|20)\d\d", n)]
+    assert not claims, f"hardcoded counts in visible copy: {claims}"
+
+
+def test_the_page_names_both_kinds_of_video():
+    """458 is only meaningful split: 41-minute founder interviews and
+    3-hour broadcasts are different things to search."""
+    assert "by_format" in PAGE
+    assert "founder interviews" in PAGE
+    assert "live streams" in PAGE
+
+
+def test_the_status_line_survives_a_slow_episodes_call():
+    """ARCHIVE_COUNT is 0 until /v1/episodes answers, and somebody can
+    search before then. Printing "searching 0 episodes" would be a lie
+    told by a loading state."""
+    assert 'ARCHIVE_COUNT ? `${ARCHIVE_COUNT} episodes` : "the archive"' in PAGE

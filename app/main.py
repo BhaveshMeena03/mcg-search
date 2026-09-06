@@ -88,7 +88,20 @@ async def episodes() -> dict:
     else:
         return {"count": 0, "hours": 0, "episodes": []}
     total = sum(r["seconds"] for r in rows)
-    return {"count": len(rows), "hours": round(total / 3600), "episodes": rows}
+    # Broken out because the two kinds are not interchangeable: a
+    # 41-minute interview is one project explained, a 3-hour broadcast is
+    # the market talk that exists nowhere else. The page says both, and
+    # says them from here rather than from a number typed into the HTML.
+    by_kind = {}
+    for r in rows:
+        kind = r.get("format", "interview")
+        entry = by_kind.setdefault(kind, {"count": 0, "seconds": 0})
+        entry["count"] += 1
+        entry["seconds"] += r["seconds"]
+    for entry in by_kind.values():
+        entry["hours"] = round(entry["seconds"] / 3600)
+    return {"count": len(rows), "hours": round(total / 3600),
+            "by_format": by_kind, "episodes": rows}
 
 
 @app.get("/v1/summaries")

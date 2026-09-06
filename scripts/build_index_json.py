@@ -35,6 +35,12 @@ def build(episodes: list[dict]) -> list[dict]:
             # The last segment's start time, which is close enough to a
             # runtime and costs nothing to compute.
             "seconds": int(e["segments"][-1]["t"]) if e.get("segments") else 0,
+            # Carried so the page can count the two kinds separately. It
+            # used to be dropped here, and the headline then said "406
+            # interviews" for months after fifty four-hour broadcasts
+            # were added — a number nobody could have corrected by
+            # looking at the page, because the page had no idea.
+            "format": e.get("format", "interview"),
         }
         for e in episodes
     ]
@@ -51,6 +57,11 @@ def main() -> int:
     hours = sum(r["seconds"] for r in rows) / 3600
     print(f"wrote {SLIM.name}: {len(rows)} episodes, {hours:.0f} hours, "
           f"{SLIM.stat().st_size / 1024:.0f} KB")
+    for kind in ("interview", "stream"):
+        part = [r for r in rows if r["format"] == kind]
+        if part:
+            print(f"  {kind:10} {len(part):4}  "
+                  f"{sum(r['seconds'] for r in part) / 3600:6.1f} h")
     return 0
 
 

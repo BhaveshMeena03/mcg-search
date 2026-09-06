@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MCG Search — ask 406 interviews anything</title>
+<title>MCG Search — ask the MCG archive anything</title>
 <meta name="description" content="Semantic search over every MCG interview. Ask a question, get the answer with the moment they said it.">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -247,7 +247,7 @@ footer a{color:var(--ink-2)}
     <span>Auto-generated captions</span><span class="dot"></span>
     <span>not financial advice</span><span class="dot"></span>
     <!-- MCG's own line, from their channel description. It is the single
-         most important thing on the page: the archive is 406 founders
+         most important thing on the page: the archive is 408 founders
          pitching their own tokens. -->
     <span><b>appearance on the show ≠ endorsement</b></span><span class="dot"></span>
     <span>independent project, not affiliated</span>
@@ -260,9 +260,14 @@ footer a{color:var(--ink-2)}
       <span class="mark">MCG</span> · search
       <span class="onair"><i></i>TUE &amp; THU 12:30 EST</span>
     </div>
-    <h1>Ask <em>406 interviews</em> anything.</h1>
-    <p class="sub">One project per episode, 275 hours of them. Search by meaning
-      rather than keywords — and press a timestamp to hear them say it.</p>
+    <!-- Filled from /v1/episodes on load. The counts were hardcoded and
+         went stale the day the live streams were indexed: the headline
+         read "406 interviews" over an archive of 458 videos. Anything
+         that claims a number now reads it from the same place the
+         episode list does. -->
+    <h1>Ask <em>the MCG archive</em> anything.</h1>
+    <p class="sub" id="heroSub">Search by meaning rather than keywords —
+      and press a timestamp to hear them say it.</p>
 
     <form class="searchbar" id="f">
       <input id="q" autocomplete="off" spellcheck="false"
@@ -434,8 +439,9 @@ $("#f").onsubmit = async e => {
   $("#stage").classList.add("on");
   const ans = $("#answer"); ans.textContent = "";
   $("#cites").innerHTML = ""; $("#citeWrap").hidden = true;
+  const scope = ARCHIVE_COUNT ? `${ARCHIVE_COUNT} episodes` : "the archive";
   $("#status").innerHTML =
-    `<span class="bars"><s></s><s></s><s></s><s></s></span> searching 406 episodes`;
+    `<span class="bars"><s></s><s></s><s></s><s></s></span> searching ${scope}`;
 
   const cursor = el("span", "cursor");
   try {
@@ -483,9 +489,13 @@ $("#f").onsubmit = async e => {
   }
 };
 
-/* The episode list doubles as proof of scale: 406 rows is the argument
+/* The episode list doubles as proof of scale: 458 rows is the argument
    that this generalises past one show. */
 let SUMMARIES = {};
+/* 0 until /v1/episodes answers. The status line falls back to "the
+   archive" in that window rather than printing a number it does not
+   have yet. */
+let ARCHIVE_COUNT = 0;
 
 Promise.all([
   fetch("/v1/episodes").then(r => r.json()),
@@ -494,7 +504,23 @@ Promise.all([
   fetch("/v1/summaries").then(r => r.json()).catch(() => ({ summaries: {} })),
 ]).then(([d, s]) => {
   SUMMARIES = s.summaries || {};
+  ARCHIVE_COUNT = d.count || 0;
   const n = Object.keys(SUMMARIES).length;
+
+  /* The headline, from the data. An interview and a four-hour broadcast
+     are different things to a reader, so both are named rather than
+     summed into one word. */
+  const fmt = d.by_format || {};
+  const parts = [];
+  if (fmt.interview) parts.push(`${fmt.interview.count} founder interviews`);
+  if (fmt.stream) parts.push(`${fmt.stream.count} live streams`);
+  if (parts.length) {
+    $("h1").innerHTML = `Ask <em>${d.count} videos</em> anything.`;
+    $("#heroSub").textContent =
+      `${parts.join(" and ")} — ${d.hours} hours. Search by meaning ` +
+      `rather than keywords, and press a timestamp to hear them say it.`;
+  }
+
   $("#epLede").textContent =
     `${d.count} episodes · ${d.hours} hours` +
     (n ? ` · ${n} with a summary you can expand` : "");
