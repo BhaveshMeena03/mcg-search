@@ -9,9 +9,20 @@ name: keep warm
 # late run. GitHub's scheduler is best-effort and can drift by a few
 # minutes, which is why the margin exists.
 
+# The schedule is OFF, and the reason is that there is nothing to keep
+# warm. This repo is the ingest pipeline; MCG retrieval is served by the
+# bullpen service at search.lexthedev.com/v1/mcg/*, which has its own
+# keep-warm. mcg-search.onrender.com answers 404 — no web service was ever
+# deployed from here.
+#
+# Left running, it woke every 10 minutes, expanded an unset SERVICE_URL to
+# nothing, handed curl the bare string "/v1/health", and exited 3 on a
+# malformed URL — 144 failed runs and 144 emails a day, about a service
+# that does not exist.
+#
+# Kept rather than deleted because the moment this repo does get deployed
+# it is the right file: set the SERVICE_URL secret and put the cron back.
 on:
-  schedule:
-    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -20,6 +31,12 @@ jobs:
     steps:
       - name: Ping the health endpoint
         run: |
+          # Manual runs still need the secret; say so instead of exiting 3
+          # on a URL that is just the path.
+          if [ -z "${{ secrets.SERVICE_URL }}" ]; then
+            echo "SERVICE_URL is not set — nothing to ping."
+            exit 0
+          fi
           # Health only. It touches no model and costs nothing, unlike
           # pinging a search endpoint, which would run up a bill 144
           # times a day to prove the box is on.
