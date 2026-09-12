@@ -13,7 +13,6 @@ Run after scripts/fetch_episodes.py.
 """
 
 import asyncio
-import hashlib
 import json
 import logging
 import sys
@@ -93,17 +92,70 @@ def ensure_index(settings) -> None:
     log("index ready")
 
 
-def first_window_id(ep: Episode) -> str:
-    """The vector id of an episode's first window.
+# How many resume probes are in flight at once. It is one round trip
+# per episode, and 600-odd of them in series is minutes of waiting
+# before the first embedding; Pinecone takes this much in parallel
+# without complaint.
+RESUME_CONCURRENCY = 8
 
-    Ids are sha256(episode_id:start_seconds), and the first window always
-    starts at the first segment's timestamp — so this is computable without
-    building every window, and its presence means the episode is indexed.
+
+async def indexed_episode_ids(idx, episodes: list[Episode], settings) -> set[str]:
+    """Which of these episodes already have anything in the index.
+
+    One metadata-filtered query per episode: is there a single vector
+    carrying this episode_id. That is the question the resume actually
+    has, and no particular window has to survive for the answer to be
+    right.
+
+    What this replaces guessed instead. Ids are
+    sha256(episode_id:start_seconds) and an episode's first window
+    starts at its first segment, so the first id is computable from the
+    transcript alone — and the check fetched it. But ingest() drops
+    stream windows that duplicate an already-published clip, and when
+    the dropped one is the OPENING window that id is never written. The
+    episode is wholly indexed and the check reports it missing.
+    Measured on 2026-09-12 after the 173-episode backfill: 62 of 634
+    episodes, every one of them in fact present, re-embedded through
+    voyage-3.5 on every single run.
+
+    Still an optimisation rather than correctness, and still safe to
+    interrupt: the ids are deterministic, so an episode indexed twice
+    overwrites its own rows.
     """
-    start = ep.segments[0].t if ep.segments else 0.0
-    return hashlib.sha256(
-        f"{ep.episode_id}:{start}".encode()
-    ).hexdigest()[:32]
+    # Build the client once, here, rather than racing to build it in
+    # eight threads at the same time.
+    index, namespace = idx.index, idx.namespace
+    # query() wants a vector even when the filter decides the result.
+    # Not all zeros — cosine has no angle to a zero vector and Pinecone
+    # rejects it.
+    probe = [1.0] + [0.0] * (settings.embedding_dimension - 1)
+    gate = asyncio.Semaphore(RESUME_CONCURRENCY)
+
+    async def present(ep: Episode) -> str | None:
+        def _query():
+            return index.query(
+                vector=probe, top_k=1, namespace=namespace,
+                filter={"episode_id": {"$eq": ep.episode_id}},
+                include_metadata=False, include_values=False,
+            )
+
+        async with gate:
+            # Bounded like every other Pinecone call. The client has no
+            # read timeout of its own, so a half-open socket here would
+            # hang before a single episode had been indexed.
+            got = await asyncio.wait_for(
+                asyncio.to_thread(_query),
+                timeout=settings.pinecone_read_timeout_seconds,
+            )
+        return ep.episode_id if (getattr(got, "matches", None) or []) else None
+
+    found = await asyncio.gather(
+        *(present(e) for e in episodes), return_exceptions=True
+    )
+    for result in found:
+        if isinstance(result, BaseException):
+            raise result
+    return {eid for eid in found if eid}
 
 
 async def main(argv: list[str]) -> int:
@@ -134,34 +186,16 @@ async def main(argv: list[str]) -> int:
     # that can disagree with reality.
     todo = episodes
     if not force:
-        ids = {first_window_id(e): e for e in episodes}
-        present: set[str] = set()
-        all_ids = list(ids)
-        for start in range(0, len(all_ids), 100):
-            chunk = all_ids[start:start + 100]
-
-            def _fetch(batch=chunk):
-                return idx.index.fetch(ids=batch, namespace=idx.namespace)
-
-            # Bounded like every other Pinecone call. The client has no
-            # read timeout of its own, so a half-open socket here would
-            # hang before a single episode had been indexed.
-            try:
-                got = await asyncio.wait_for(
-                    asyncio.to_thread(_fetch),
-                    timeout=settings.pinecone_read_timeout_seconds,
-                )
-            except Exception as exc:                          # noqa: BLE001
-                # Resume is an optimisation, not correctness: the vector
-                # ids are deterministic, so re-indexing an episode
-                # overwrites its own rows. Failing to check costs money,
-                # not data, so say so and do the work rather than stop.
-                log(f"resume check failed ({exc}) — indexing everything")
-                present = set()
-                break
-            present |= set(getattr(got, "vectors", {}) or {})
+        try:
+            present = await indexed_episode_ids(idx, episodes, settings)
+        except Exception as exc:                              # noqa: BLE001
+            # Resume is an optimisation, not correctness: the vector ids
+            # are deterministic, so re-indexing an episode overwrites its
+            # own rows. Failing to check costs money, not data, so say so
+            # and do the work rather than stop.
+            log(f"resume check failed ({exc}) — indexing everything")
         else:
-            todo = [e for vid, e in ids.items() if vid not in present]
+            todo = [e for e in episodes if e.episode_id not in present]
         log(f"{len(episodes) - len(todo)} already indexed, {len(todo)} to do")
 
     # Clips, for deduplicating streams against. Built from the file

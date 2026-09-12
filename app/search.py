@@ -255,6 +255,25 @@ def _windows(
     return windows
 
 
+def window_id(episode_id: str, start_seconds: float) -> str:
+    """The vector id for one window.
+
+    Deterministic, so re-running an episode overwrites its own rows
+    instead of duplicating them. That is what makes the ingest safe to
+    interrupt and resume.
+
+    Note what it is NOT. You cannot enumerate an episode's ids without
+    its transcript, and an id says nothing about whether the window it
+    names was actually written — ingest() below drops stream windows
+    already published as a clip. The resume check in
+    scripts/ingest_episodes.py assumed otherwise and paid for it; see
+    indexed_episode_ids() there.
+    """
+    return hashlib.sha256(
+        f"{episode_id}:{start_seconds}".encode()
+    ).hexdigest()[:32]
+
+
 def pack_times(line_times: list[float]) -> str:
     """Line start times as a compact string, e.g. "0,7,14,21".
 
@@ -615,12 +634,7 @@ class MCGIndex:
 
         vectors = [
             {
-                # Deterministic, so re-running an episode overwrites its own
-                # rows instead of duplicating them. That is what makes the
-                # ingest safe to interrupt and resume.
-                "id": hashlib.sha256(
-                    f"{r['episode_id']}:{r['start_seconds']}".encode()
-                ).hexdigest()[:32],
+                "id": window_id(r["episode_id"], r["start_seconds"]),
                 "values": emb,
                 "metadata": r,
             }

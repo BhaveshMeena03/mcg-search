@@ -74,42 +74,11 @@ def test_whitespace_and_empty_entries_are_ignored():
                                          protected_indexes=" x , y "))
 
 
-def test_first_window_id_is_deterministic():
-    """Re-indexing an episode must overwrite its rows, not duplicate them.
-
-    That property is what makes the ingest safe to interrupt, and it
-    holds only while the id is a pure function of (episode, start).
-    """
-    from app.schemas import Episode
-
-    ingest = _load_ingest()
-    ep = Episode(episode_id="abc123", title="t",
-                 url="https://www.youtube.com/watch?v=abc123",
-                 segments=[{"t": 4.5, "text": "hello"}])
-    assert ingest.first_window_id(ep) == ingest.first_window_id(ep)
-    assert len(ingest.first_window_id(ep)) == 32
-
-
-def test_first_window_id_differs_per_episode():
-    from app.schemas import Episode
-
-    ingest = _load_ingest()
-
-    def ep(eid):
-        return Episode(episode_id=eid, title="t", url="https://x/watch?v=1",
-                       segments=[{"t": 0.0, "text": "hello"}])
-
-    assert ingest.first_window_id(ep("a")) != ingest.first_window_id(ep("b"))
-
-
-def test_first_window_id_survives_an_episode_with_no_segments():
-    """Must not raise. An empty episode is odd, not fatal."""
-    from app.schemas import Episode
-
-    ingest = _load_ingest()
-    ep = Episode(episode_id="empty", title="t", url="https://x/watch?v=1",
-                 segments=[])
-    assert len(ingest.first_window_id(ep)) == 32
+# The vector ids the ingest writes, and what the resume check may
+# conclude from them, live in tests/test_resume.py. They used to be
+# asserted here against a copy of the id formula kept in the ingest
+# script — that copy is gone, because reasoning about ids is exactly
+# what made the resume check wrong for streams.
 
 
 # --- the scheduled sync is guarded like the manual ingest ---------------
