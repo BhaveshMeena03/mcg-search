@@ -149,23 +149,62 @@ def fetch(video_id: str, cookies: str | None = None,
     return None
 
 
+def tab_ids(tab: str, cookies: str | None = None,
+            limit: int | None = None) -> list[str]:
+    """Video ids from one channel tab — "videos" or "streams"."""
+    base = get_settings().youtube_channel.rstrip("/")
+    for suffix in ("/videos", "/streams", "/featured"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    cmd = [YTDLP, "--flat-playlist", "--print", "%(id)s",
+           "--remote-components", "ejs:github", *_cookie_args(cookies)]
+    if limit:
+        cmd += ["--playlist-end", str(limit)]
+    cmd.append(f"{base}/{tab}")
+    out = subprocess.run(cmd, capture_output=True, text=True,
+                         check=False, env=_env())
+    found = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
+    if not found:
+        err = (out.stderr.strip().splitlines() or ["(no stderr)"])[-1]
+        print(f"  !! listing {base}/{tab} failed — {err[:140]}")
+    return found
+
+
 def channel_ids(limit: int | None = None, cookies: str | None = None) -> list[str]:
     """Video ids from the channel, newest first.
 
     Deliberately NOT the same request as the per-video fetch: listing the
     channel is one cheap call and is not what the bot check guards.
     """
-    cmd = [YTDLP, "--flat-playlist", "--print", "%(id)s",
-           "--remote-components", "ejs:github", *_cookie_args(cookies)]
-    if limit:
-        cmd += ["--playlist-end", str(limit)]
-    cmd.append(get_settings().youtube_channel)
-    out = subprocess.run(cmd, capture_output=True, text=True,
-                         check=False, env=_env())
-    ids = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
-    if not ids:
-        err = (out.stderr.strip().splitlines() or ["(no stderr)"])[-1]
-        print(f"  !! channel listing failed — {err[:140]}")
+    # BOTH tabs. /videos excludes live streams, and MCG's daily show IS a
+    # live stream -- 174 of their 225 streams were missing from the index
+    # because only /videos was ever listed. That is most of the market
+    # commentary, and it is why a guest could be on the show twice and the
+    # archive knew about one of them.
+    base = get_settings().youtube_channel.rstrip("/")
+    for tab in ("/videos", "/streams", "/featured"):
+        if base.endswith(tab):
+            base = base[: -len(tab)]
+            break
+    ids: list[str] = []
+    seen: set[str] = set()
+    for url in (f"{base}/videos", f"{base}/streams"):
+        cmd = [YTDLP, "--flat-playlist", "--print", "%(id)s",
+               "--remote-components", "ejs:github", *_cookie_args(cookies)]
+        if limit:
+            cmd += ["--playlist-end", str(limit)]
+        cmd.append(url)
+        out = subprocess.run(cmd, capture_output=True, text=True,
+                             check=False, env=_env())
+        found = [ln.strip() for ln in out.stdout.splitlines() if ln.strip()]
+        if not found:
+            err = (out.stderr.strip().splitlines() or ["(no stderr)"])[-1]
+            print(f"  !! listing {url} failed — {err[:140]}")
+        for video_id in found:
+            if video_id not in seen:
+                seen.add(video_id)
+                ids.append(video_id)
     return ids[:limit] if limit else ids
 
 
@@ -196,11 +235,22 @@ def main(argv: list[str]) -> int:
     done = {e["episode_id"] for e in existing}
     todo = [v for v in ids if v not in done]
 
+    # Which ids are broadcasts, asked once rather than per video.
+    streams = set(tab_ids("streams", cookies)) if todo else set()
+
     print(f"Fetching {len(todo)} episode(s) ({len(done)} already cached)...")
     fetched = 0
     for i, vid in enumerate(todo):
         ep = fetch(vid, cookies)
         if ep:
+            # The format decides whether the ingest deduplicates this
+            # against the clips cut out of it. fetch_streams.py set it and
+            # this script never did, which was survivable only while this
+            # script listed /videos alone. It lists /streams too now, so
+            # 170 broadcasts landed labelled "interview" -- and an
+            # interview is never deduped, so ingesting them would have
+            # stored the same conversations twice.
+            ep["format"] = "stream" if vid in streams else "interview"
             # Save one at a time. A run that spans hours must never write
             # back the stale snapshot it started from.
             merge_episodes([ep], OUT)
